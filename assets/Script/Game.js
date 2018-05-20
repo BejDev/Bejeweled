@@ -1,0 +1,280 @@
+import lodash from "lodash";
+let config = require("config");
+let Gem = require("Gem");
+let GemColor = Gem["GemColor"];
+let GemType = Gem["GemType"];
+
+let choosing_gem = null; //被单击选中的宝石
+cc.Class({
+  extends: cc.Component,
+  properties: {
+    map: {
+      default: [],
+      visible: false
+    },
+    color_map: {
+      default: [],
+      visible: false
+    },
+    width: config.map_width,
+    height: config.map_height,
+    wall: {
+      default: null,
+      type: cc.Node,
+      tooltip: "宝石所处的墙"
+    },
+    gems: {
+      default: [],
+      type: [cc.Prefab],
+      tooltip: "宝石数组"
+    },
+    gem_spacing: {
+      default: 74,
+      tooltip: "宝石间距"
+    }
+  },
+
+  onLoad() {
+    // 创建对象池
+    // TODO
+    this.enemyPool = cc.NodePool();
+    this.choosing_gem = null;
+    const random_of_max_num = this.gems.length;
+    for (var x = 0; x < this.height; x++) {
+      this.map[x] = [];
+      this.color_map[x] = [];
+      for (var y = 0; y < this.width; y++) {
+        this.color_map[x][y] = this.random_num(0, random_of_max_num - 1);
+      }
+    }
+    // this.color_map = [
+    //   [1, 2, 3, 4, 5, 4, 1, 1],
+    //   [2, 0, 5, 1, 2, 5, 1, 1],
+    //   [3, 2, 1, 6, 0, 2, 3, 1],
+    //   [4, 3, 5, 3, 2, 5, 4, 3],
+    //   [5, 2, 2, 0, 2, 2, 3, 4],
+    //   [6, 1, 6, 4, 3, 5, 1, 2],
+    //   [1, 2, 3, 5, 5, 6, 5, 1],
+    //   [2, 6, 2, 3, 2, 0, 1, 5]
+    // ];
+    cc.log(this.color_map);
+
+    for (var x = 0; x < this.height; x++) {
+      for (var y = 0; y < this.width; y++) {
+        let color = this.color_map[x][y];
+        while (this.check_color(x, y, color)) {
+          color = this.random_num(0, random_of_max_num - 1);
+        }
+        this.color_map[x][y] = color;
+        const prefab = this.gems[color];
+        let gem = this.create_gem(prefab);
+        this.set_gem(x, y, gem);
+      }
+    }
+  },
+
+  /**
+   * 返回[min_num, max_num] 中的任意整数
+   *
+   * @param {number} min_num 最小值
+   * @param {number} max_num 最大值
+   *
+   * @returns {number}
+   */
+  random_num(min_num, max_num) {
+    if (min_num === null || max_num === null) {
+      cc.error("null param");
+      return 0;
+    }
+    return parseInt(Math.random() * (max_num - min_num + 1) + min_num, 10);
+  },
+
+  /**
+   * 创建新节点
+   *
+   * @author himself65
+   *
+   * @param {cc.Prefab} prefab 预制资源
+   */
+  create_gem(prefab) {
+    return cc.instantiate(prefab);
+  },
+
+  /**
+   * 将Gem放到Map的指定位置
+   *
+   * @author himself65
+   *
+   * @param {number} _x 横轴位置
+   * @param {number} _y 纵轴位置
+   * @param {cc.Prefab} gem 宝石的实例
+   */
+  set_gem(_x, _y, gem) {
+    if (gem === null) {
+      cc.error("gem is null");
+      return;
+    }
+    gem.parent = this.wall; // 绑定到墙上
+    // cc.log(_x, _y);
+    gem.getComponent('Gem').setMapPosition(cc.v2(_x, _y));
+    /**
+     * 此处还需要修改
+     * @todo
+     */
+    const spacing = this.gem_spacing; // 间距
+    gem.setPosition(_x * spacing - 256, _y * spacing - 253);
+    this.map[_x][_y] = gem;
+  },
+
+  /**
+   * 检查color是否和map上的宝石冲突
+   *
+   * @author himself65
+   *
+   * @param {*} _x 横轴位置
+   * @param {*} _y 纵轴位置
+   * @param {*} color 颜色
+   *
+   * @returns {boolean}
+   */
+  check_color(_x, _y, color) {
+    /**
+     * 判断一堆值是否相等
+     *
+     * @author himself65
+     */
+    const is_same = (a, b, c) => {
+      return a === b && a === c;
+    };
+
+    let tag = false;
+
+
+    const c_mp = this.color_map;
+    /**
+     * 递归实现检查棋盘
+     *
+     * @param {number} px x轴位置
+     * @param {number} py y轴位置
+     * 
+     * @returns {boolean}
+     */
+    const check = (px, py) => {
+      let a, b;
+      if (px - 2 > 0) {
+        a = c_mp[px - 1][py];
+        b = c_mp[px - 2][py];
+        if (is_same(a, b, color))
+          tag = true;
+      }
+      if (px + 2 < this.width) {
+        a = c_mp[px + 1][py];
+        b = c_mp[px + 2][py];
+        if (is_same(a, b, color))
+          tag = true;
+      }
+      if (py - 2 > 0) {
+        a = c_mp[px][py - 1];
+        b = c_mp[px][py - 2];
+        if (is_same(a, b, color))
+          tag = true;
+      }
+      if (px + 2 < this.height) {
+        a = c_mp[px][py + 1];
+        b = c_mp[px][py + 2];
+        if (is_same(a, b, color))
+          tag = true;
+      }
+    };
+    check(_x, _y);
+    // console.log(is_same(1, 2, 3));
+    // console.log(is_same(1, 1, 1));
+    if (tag === true) {
+      // 换颜色
+    } else {
+      // 无需换颜色gem_size
+    }
+    return tag;
+  },
+
+  /**
+   * 检查是否相邻
+   * @todo
+   * @param {cc.Node} Gem_a 第一个宝石
+   * @param {cc.Node} Gem_b 第二个宝石
+   *
+   * @returns {boolean}
+   */
+  can_swap(Gem_a, Gem_b) {
+    let Gemjs_a = Gem_a.getComponent('Gem');
+    let Gemjs_b = Gem_b.getComponent('Gem');
+    let aMapPositon = Gemjs_a.getMapPosition();
+    let bMapPositon = Gemjs_b.getMapPosition();
+    if (aMapPositon.x == bMapPositon.x && Math.abs(aMapPositon.y - bMapPositon.y) == 1) {
+      return true;
+    }
+    if (aMapPositon.y == bMapPositon.y && Math.abs(aMapPositon.x - bMapPositon.x) == 1) {
+      return true;
+    }
+    if (aMapPositon.x == bMapPositon.x && aMapPositon.y == bMapPositon.y) {
+      return -1;
+    }
+    return false;
+  },
+  /**
+   * @param {*} a
+   * @param {*} b
+   */
+  swap(a, b) {
+    a = [a, a = b][0];
+  },
+
+  /**
+   * 交换宝石
+   * @todo
+   * @param {cc.Node} Gem_a 第一个宝石
+   * @param {cc.Node} Gem_b 第二个宝石
+   *
+   */
+  SwapGem(Gem_a, Gem_b) {
+    let a_Position = Gem_a.getPosition();
+    let b_Position = Gem_b.getPosition();
+    Gem_a.setPosition(b_Position);
+    Gem_b.setPosition(a_Position);
+
+    let Gemjs_a = Gem_a.getComponent('Gem');
+    let Gemjs_b = Gem_b.getComponent('Gem');
+    let aMapPositon = Gemjs_a.getMapPosition();
+    let bMapPositon = Gemjs_b.getMapPosition();
+
+    let tmp = this.color_map[aMapPositon.x][aMapPositon.y];
+    this.color_map[aMapPositon.x][aMapPositon.y] = this.color_map[bMapPositon.x][bMapPositon.y];
+    this.color_map[bMapPositon.x][bMapPositon.y] = tmp;
+    //swap(this.color_map[aMapPositon.x][aMapPositon.y], this.color_map[bMapPositon.x][bMapPositon.y]);
+
+    tmp = this.map[aMapPositon.x][aMapPositon.y];
+    this.map[aMapPositon.x][aMapPositon.y] = this.map[bMapPositon.x][bMapPositon.y];
+    this.map[bMapPositon.x][bMapPositon.y] = tmp;
+    //swap(this.map[aMapPositon.x][aMapPositon.y], this.map[bMapPositon.x][bMapPositon.y]);
+
+    Gemjs_a.setMapPosition(bMapPositon);
+    Gemjs_b.setMapPosition(aMapPositon);
+  },
+  // update() {
+  // 	if(this.choosing_gem !== null){
+  // 		cc.log(this.choosing_gem.getComponent('Gem').getMapPosition());
+  // 	} else {
+  // 		cc.log(null);
+  // 	}
+  // },
+  /**
+   * 获取棋盘的对应坐标的宝石
+   * @param {integer} _x 横坐标
+   * @param {integer} _y
+   * @returns {cc.Node}
+   */
+  getGem(_x, _y) {
+    cc.log(_x, _y);
+    return this.map[_x][_y];
+  },
+});
