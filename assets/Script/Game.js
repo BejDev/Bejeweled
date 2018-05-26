@@ -229,7 +229,7 @@ cc.Class({
    * @return {boolean}
    */
   checkValidMove(Gem_a, Gem_b) {
-
+    return true;
   },
   /**
    * 移动宝石（总）
@@ -237,10 +237,10 @@ cc.Class({
    * @param {[type]} Gem_b [description]
    */
   SwapGem(Gem_a, Gem_b) {
-    if(checkValidMove(Gem_a, Gem_b)){
-      SwapGemValid(Gem_a, Gem_b);
+    if(this.checkValidMove(Gem_a, Gem_b)){
+      this.SwapGemValid(Gem_a, Gem_b);
     } else {
-      SwapGemInvalid(Gem_a, Gem_b);
+      this.SwapGemInvalid(Gem_a, Gem_b);
     }
   },
   /**
@@ -250,7 +250,7 @@ cc.Class({
    */
   SwapGemInvalid(Gem_a, Gem_b){
 
-  }
+  },
   /**
    * 交换宝石（可以交换时调用）
    * @param {cc.Node} Gem_a 第一个宝石
@@ -296,6 +296,7 @@ cc.Class({
    * 
    */
   delChoosingGem(){
+    if(this.choosing_gem === null) return;
     this.choosing_gem.getComponent("Gem").chooingJpg.active = false;
     this.choosing_gem = null;
   },
