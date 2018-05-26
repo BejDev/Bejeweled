@@ -102,7 +102,7 @@ cc.Class({
   },
 
   /**
-   * 将Gem放到Map的指定位置
+   * 将 Gem 放到 Map 的指定位置
    *
    * @author himself65
    *
@@ -200,7 +200,6 @@ cc.Class({
 
   /**
    * 检查是否相邻
-   * @todo
    * @param {cc.Node} Gem_a 第一个宝石
    * @param {cc.Node} Gem_b 第二个宝石
    *
@@ -223,13 +222,42 @@ cc.Class({
     return false;
   },
   /**
-   * 交换宝石
+   * 判断移动是否有效
    * @todo
+   * @param  {cc.Node} Gem_a
+   * @param  {cc.Node} Gem_b
+   * @return {boolean}
+   */
+  checkValidMove(Gem_a, Gem_b) {
+
+  },
+  /**
+   * 移动宝石（总）
+   * @param {[type]} Gem_a [description]
+   * @param {[type]} Gem_b [description]
+   */
+  SwapGem(Gem_a, Gem_b) {
+    if(checkValidMove(Gem_a, Gem_b)){
+      SwapGemValid(Gem_a, Gem_b);
+    } else {
+      SwapGemInvalid(Gem_a, Gem_b);gma
+    }
+  },
+  /**
+   * 无效移动
+   * @param {[type]} Gem_a [description]
+   * @param {[type]} Gem_b [description]
+   */
+  SwapGemInvalid(Gem_a, Gem_b){
+
+  }
+  /**
+   * 交换宝石（可以交换时调用）
    * @param {cc.Node} Gem_a 第一个宝石
    * @param {cc.Node} Gem_b 第二个宝石
    *
    */
-  SwapGem(Gem_a, Gem_b) {
+  SwapGemValid(Gem_a, Gem_b) {
     let a_Position = Gem_a.getPosition();
     let b_Position = Gem_b.getPosition();
     Gem_a.setPosition(b_Position);
