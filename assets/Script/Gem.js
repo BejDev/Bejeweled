@@ -49,16 +49,12 @@ cc.Class({
             default: 60,
             tooltip: "宝石大小"
         },
-        chooingJpg: {
-            type: cc.Node,
-            default: null,
-            tooltip: "被选中图片标记"
-        },
     },
 
     start() {
         this.wall = this.node.parent;
         this.game = this.wall.getComponent('Game');
+        this.game.GemMoving = false;
     },
 
     get_color() {
@@ -78,26 +74,34 @@ cc.Class({
             this.MouseIsOver = false;
         }, this);
         this.node.on('mousedown', function (event) {
+            if(this.game.GemMoving === true){
+                return;
+            }
             let original_gem = this.game.choosing_gem;
             if(original_gem == null || this.game.can_swap(original_gem, this.node) == false){
-                this.game.setChoosingGem(this.node);
+                this.game.choosing_gem = this.node;
                 // cc.log(1111);
             } else if(this.game.can_swap(original_gem, this.node) == -1){
-            	this.game.delChoosingGem();
+            	this.game.choosing_gem = null;
             } else {
-            	cc.log(original_gem.getComponent('Gem').getMapPosition());
-            	cc.log(this.getMapPosition());
-                this.game.SwapGem(original_gem, this.node);
-                this.game.delChoosingGem();
+            	//cc.log(original_gem.getComponent('Gem').getMapPosition());
+                //cc.log(this.getMapPosition());
+                
+                    this.game.SwapGem(original_gem, this.node);
+                    this.game.choosing_gem = null;
+                
                 // cc.log(2222);
             }
         }, this);
         this.node.on('touchcancel', function (event) {
+            if(this.game.GemMoving === true){
+                return;
+            }
         	// cc.log(this.getMapPosition());
             let pre = event.getStartLocation();
             let dx = event.getLocationX() - pre.x;
             let dy = event.getLocationY() - pre.y;
-            cc.log(dx,dy);
+            //cc.log(dx,dy);
             let SwapGems = null;
             if(Math.abs(dx) + Math.abs(dy) >= this.gem_size/2){
             	if(Math.abs(dx) > Math.abs(dy)) {
@@ -118,7 +122,7 @@ cc.Class({
                 cc.log('validMove is none');
             } else {
                 this.game.SwapGem(this.node, SwapGems);
-                cc.log(3333);
+                //cc.log(3333);
             }
         }, this);
     },
@@ -135,17 +139,18 @@ cc.Class({
      */
     setMapPosition(Position) {
     	this.XinColorMap = Position.x;
-    	this.YinColorMap = Position.y;
+        this.YinColorMap = Position.y;
     },
 
     onKeyDown(event) {
-        if (this.MouseIsOver !== true) {
+        if (this.MouseIsOver !== true || this.game.GemMoving===false) {
             return;
         } else {
         	cc.log(this.getMapPosition());
         }
         let SwapGem_1 = null;
         let SwapGem_2 = null;
+        cc.log(this.game.choosing_gem);
         let hasChoosingGem = -1;
         if (this.game.choosing_gem !== null) {
             SwapGem_1 = this.game.choosing_gem;
@@ -177,10 +182,10 @@ cc.Class({
             default:
                 cc.log(event.keyCode);
         }
-        cc.log(SwapGem_2);
+        // cc.log(SwapGem_2);
         this.game.SwapGem(SwapGem_1, SwapGem_2);
         if(hasChoosingGem == false) {
-        	this.game.delChoosingGem();
+        	this.game.choosing_gem = null;
         }
     },
 

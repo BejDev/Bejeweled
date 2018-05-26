@@ -5,6 +5,7 @@ let GemColor = Gem["GemColor"];
 let GemType = Gem["GemType"];
 
 let choosing_gem = null; //被单击选中的宝石
+let GemMoving = false;
 cc.Class({
   extends: cc.Component,
   properties: {
@@ -32,6 +33,10 @@ cc.Class({
       default: 74,
       tooltip: "宝石间距"
     },
+    move_speed: {
+      default: 0.2,
+      tooltip: "移动速度"
+    }
   },
 
   onLoad() {
@@ -249,7 +254,31 @@ cc.Class({
    * @param {[type]} Gem_b [description]
    */
   SwapGemInvalid(Gem_a, Gem_b){
+    this.GemMoving=true;
+    let a_Position = Gem_a.getPosition();
+    let b_Position = Gem_b.getPosition();
 
+    let action_a = cc.moveTo(this.move_speed,a_Position);
+    let action_b = cc.moveTo(this.move_speed,b_Position);
+
+    let finished = cc.callFunc(function () {
+      this.GemMoving=false;
+    }, this);
+
+    Gem_a.setLocalZOrder(1);
+    Gem_a.runAction(cc.sequence(
+      action_b,
+      cc.delayTime(0.1),
+      action_a
+    ));
+    Gem_a.setLocalZOrder(0);
+    Gem_b.runAction(cc.sequence(
+      action_a,
+      cc.delayTime(0.1),
+      action_b,
+      cc.delayTime(0.1),
+      finished
+    ));
   },
   /**
    * 交换宝石（可以交换时调用）
@@ -258,10 +287,25 @@ cc.Class({
    *
    */
   SwapGemValid(Gem_a, Gem_b) {
+    this.GemMoving=true;
     let a_Position = Gem_a.getPosition();
     let b_Position = Gem_b.getPosition();
-    Gem_a.setPosition(b_Position);
-    Gem_b.setPosition(a_Position);
+
+    let action_a = cc.moveTo(this.move_speed,b_Position);
+    Gem_a.runAction(action_a);
+    Gem_a.setLocalZOrder(1);
+
+
+    let finished = cc.callFunc(function () {
+       this.GemMoving=false;
+    }, this);
+
+    let action_b = cc.sequence(cc.moveTo(this.move_speed,a_Position),finished);
+    Gem_b.runAction(action_b);
+    Gem_a.setLocalZOrder(0);
+
+    //Gem_a.setPosition(b_Position);
+    //Gem_b.setPosition(a_Position);
 
     let Gemjs_a = Gem_a.getComponent('Gem');
     let Gemjs_b = Gem_b.getComponent('Gem');
