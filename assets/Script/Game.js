@@ -240,7 +240,7 @@ cc.Class({
     if(checkValidMove(Gem_a, Gem_b)){
       SwapGemValid(Gem_a, Gem_b);
     } else {
-      SwapGemInvalid(Gem_a, Gem_b);gma
+      SwapGemInvalid(Gem_a, Gem_b);
     }
   },
   /**
