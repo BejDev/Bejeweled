@@ -49,6 +49,11 @@ cc.Class({
             default: 60,
             tooltip: "宝石大小"
         },
+        chooingJpg: {
+            type: cc.Node,
+            default: null,
+            tooltip: "被选中图片标记"
+        },
     },
 
     start() {
@@ -75,15 +80,15 @@ cc.Class({
         this.node.on('mousedown', function (event) {
             let original_gem = this.game.choosing_gem;
             if(original_gem == null || this.game.can_swap(original_gem, this.node) == false){
-                this.game.choosing_gem = this.node;
+                this.game.setChoosingGem(this.node);
                 // cc.log(1111);
             } else if(this.game.can_swap(original_gem, this.node) == -1){
-            	this.game.choosing_gem = null;
+            	this.game.delChoosingGem();
             } else {
             	cc.log(original_gem.getComponent('Gem').getMapPosition());
             	cc.log(this.getMapPosition());
                 this.game.SwapGem(original_gem, this.node);
-                this.game.choosing_gem = null;
+                this.game.delChoosingGem();
                 // cc.log(2222);
             }
         }, this);
@@ -141,7 +146,6 @@ cc.Class({
         }
         let SwapGem_1 = null;
         let SwapGem_2 = null;
-        cc.log(this.game.choosing_gem);
         let hasChoosingGem = -1;
         if (this.game.choosing_gem !== null) {
             SwapGem_1 = this.game.choosing_gem;
@@ -173,10 +177,10 @@ cc.Class({
             default:
                 cc.log(event.keyCode);
         }
-        // cc.log(SwapGem_2);
+        cc.log(SwapGem_2);
         this.game.SwapGem(SwapGem_1, SwapGem_2);
         if(hasChoosingGem == false) {
-        	this.game.choosing_gem = null;
+        	this.game.delChoosingGem();
         }
     },
 

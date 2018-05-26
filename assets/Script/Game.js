@@ -31,13 +31,14 @@ cc.Class({
     gem_spacing: {
       default: 74,
       tooltip: "宝石间距"
-    }
+    },
   },
 
   onLoad() {
     // 创建对象池
     // TODO
     this.enemyPool = cc.NodePool();
+
     this.choosing_gem = null;
     const random_of_max_num = this.gems.length;
     for (var x = 0; x < this.height; x++) {
@@ -222,14 +223,6 @@ cc.Class({
     return false;
   },
   /**
-   * @param {*} a
-   * @param {*} b
-   */
-  swap(a, b) {
-    a = [a, a = b][0];
-  },
-
-  /**
    * 交换宝石
    * @todo
    * @param {cc.Node} Gem_a 第一个宝石
@@ -260,13 +253,6 @@ cc.Class({
     Gemjs_a.setMapPosition(bMapPositon);
     Gemjs_b.setMapPosition(aMapPositon);
   },
-  // update() {
-  // 	if(this.choosing_gem !== null){
-  // 		cc.log(this.choosing_gem.getComponent('Gem').getMapPosition());
-  // 	} else {
-  // 		cc.log(null);
-  // 	}
-  // },
   /**
    * 获取棋盘的对应坐标的宝石
    * @param {integer} _x 横坐标
@@ -276,5 +262,25 @@ cc.Class({
   getGem(_x, _y) {
     cc.log(_x, _y);
     return this.map[_x][_y];
+  },
+  /**
+   * 取消鼠标选中
+   * 
+   */
+  delChoosingGem(){
+    this.choosing_gem.getComponent("Gem").chooingJpg.active = false;
+    this.choosing_gem = null;
+  },
+  /**
+   * 标记鼠标选中
+   * @param {cc.Node} _node 宝石节点
+   */
+  setChoosingGem(_node) {
+    if(this.choosing_gem !== null){
+      this.delChoosingGem();
+    }
+    this.choosing_gem = _node;
+    this.choosing_gem.getComponent("Gem").chooingJpg.active = true;
+    // 被选中的宝石添加选中框
   },
 });
