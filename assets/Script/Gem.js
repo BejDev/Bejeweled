@@ -1,4 +1,4 @@
-let Direction = require("Direction");
+let Direction = require("./Gem/Direction");
 /**
  * 宝石颜色枚举
  *
@@ -28,8 +28,7 @@ const GemType = cc.Enum({
 });
 
 let MouseIsOver = false; //鼠标悬停在宝石上
-let XinColorMap = -1; //宝石横坐标,从0开始
-let YinColorMap = -1;
+// 严禁将属性写在Class 外部，详细原因请看 面向对象编程
 
 cc.Class({
   extends: cc.Component,
@@ -48,6 +47,16 @@ cc.Class({
     gem_size: {
       default: 60,
       tooltip: "宝石大小"
+    },
+    pos_x: {
+      default: -1,
+      visible: false,
+      tooltip: "保存宝石的位置"
+    },
+    pos_y: {
+      default: -1,
+      visible: false,
+      tooltip: "保存宝石的位置"
     }
   },
 
@@ -62,7 +71,7 @@ cc.Class({
   },
 
   get_XYinMap() {
-    return cc.v2(this.XinColorMap, this.YinColorMap);
+    return cc.v2(this.pos_x, this.pos_y);
   },
 
   onLoad() {
@@ -122,32 +131,20 @@ cc.Class({
         if (Math.abs(dx) + Math.abs(dy) >= this.gem_size / 2) {
           if (Math.abs(dx) > Math.abs(dy)) {
             if (dx > 0) {
-              SwapGems = this.game.getGem(
-                this.XinColorMap + 1,
-                this.YinColorMap
-              );
+              SwapGems = this.game.getGem(this.pos_x + 1, this.pos_y);
             } else {
-              SwapGems = this.game.getGem(
-                this.XinColorMap - 1,
-                this.YinColorMap
-              );
+              SwapGems = this.game.getGem(this.pos_x - 1, this.pos_y);
             }
           } else {
             if (dy > 0) {
-              SwapGems = this.game.getGem(
-                this.XinColorMap,
-                this.YinColorMap + 1
-              );
+              SwapGems = this.game.getGem(this.pos_x, this.pos_y + 1);
             } else {
-              SwapGems = this.game.getGem(
-                this.XinColorMap,
-                this.YinColorMap - 1
-              );
+              SwapGems = this.game.getGem(this.pos_x, this.pos_y - 1);
             }
           }
         }
         if (SwapGems === null) {
-          cc.log("validMove is none");
+          cc.error("validMove is none");
         } else {
           this.game.SwapGem(this.node, SwapGems);
           //cc.log(3333);
@@ -161,15 +158,15 @@ cc.Class({
    * @returns {cc.v2(x,y)}
    */
   getMapPosition() {
-    return cc.v2(this.XinColorMap, this.YinColorMap);
+    return cc.v2(this.pos_x, this.pos_y);
   },
   /**
    * 重置宝石在棋盘位置
    * @param {cc.v2(x,y)} Position
    */
   setMapPosition(Position) {
-    this.XinColorMap = Position.x;
-    this.YinColorMap = Position.y;
+    this.pos_x = Position.x;
+    this.pos_y = Position.y;
   },
 
   onKeyDown(event) {

@@ -1,4 +1,4 @@
-let config = require("config");
+let config = require("./utils/config");
 let Gem = require("Gem");
 let GemColor = Gem["GemColor"];
 let GemType = Gem["GemType"];
@@ -87,8 +87,10 @@ cc.Class({
    *
    * @param {cc.Prefab} prefab 预制资源
    */
-  create_gem(prefab) {
-    return cc.instantiate(prefab);
+  create_gem(prefab, options) {
+    let gem = cc.instantiate(prefab);
+    // Pre_init
+    return gem;
   },
 
   /**
@@ -101,7 +103,7 @@ cc.Class({
    * @param {cc.Prefab} gem 宝石的实例
    */
   set_gem(_x, _y, gem) {
-    if (gem === null) {
+    if (gem === undefined) {
       cc.error("gem is null");
       return;
     }
@@ -203,7 +205,7 @@ cc.Class({
    * @return {boolean}
    */
   checkValidMove(Gem_a, Gem_b) {
-    return true;
+    return false;
   },
 
   /**
