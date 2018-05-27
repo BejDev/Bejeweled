@@ -122,7 +122,7 @@ cc.Class({
     }
     gem.parent = this.wall; // 绑定到墙上
     // cc.log(_x, _y);
-    gem.getComponent('Gem').setMapPosition(cc.v2(_x, _y));
+    gem.getComponent("Gem").setMapPosition(cc.v2(_x, _y));
     /**
      * 此处还需要修改
      * @todo
@@ -155,14 +155,13 @@ cc.Class({
 
     let tag = false;
 
-
     const c_mp = this.color_map;
     /**
      * 递归实现检查棋盘
      *
      * @param {number} px x轴位置
      * @param {number} py y轴位置
-     * 
+     *
      * @returns {boolean}
      */
     const check = (px, py) => {
@@ -170,26 +169,22 @@ cc.Class({
       if (px - 2 > 0) {
         a = c_mp[px - 1][py];
         b = c_mp[px - 2][py];
-        if (is_same(a, b, color))
-          tag = true;
+        if (is_same(a, b, color)) tag = true;
       }
       if (px + 2 < this.width) {
         a = c_mp[px + 1][py];
         b = c_mp[px + 2][py];
-        if (is_same(a, b, color))
-          tag = true;
+        if (is_same(a, b, color)) tag = true;
       }
       if (py - 2 > 0) {
         a = c_mp[px][py - 1];
         b = c_mp[px][py - 2];
-        if (is_same(a, b, color))
-          tag = true;
+        if (is_same(a, b, color)) tag = true;
       }
       if (px + 2 < this.height) {
         a = c_mp[px][py + 1];
         b = c_mp[px][py + 2];
-        if (is_same(a, b, color))
-          tag = true;
+        if (is_same(a, b, color)) tag = true;
       }
     };
     check(_x, _y);
@@ -211,14 +206,20 @@ cc.Class({
    * @returns {boolean}
    */
   can_swap(Gem_a, Gem_b) {
-    let Gemjs_a = Gem_a.getComponent('Gem');
-    let Gemjs_b = Gem_b.getComponent('Gem');
+    let Gemjs_a = Gem_a.getComponent("Gem");
+    let Gemjs_b = Gem_b.getComponent("Gem");
     let aMapPositon = Gemjs_a.getMapPosition();
     let bMapPositon = Gemjs_b.getMapPosition();
-    if (aMapPositon.x == bMapPositon.x && Math.abs(aMapPositon.y - bMapPositon.y) == 1) {
+    if (
+      aMapPositon.x == bMapPositon.x &&
+      Math.abs(aMapPositon.y - bMapPositon.y) == 1
+    ) {
       return true;
     }
-    if (aMapPositon.y == bMapPositon.y && Math.abs(aMapPositon.x - bMapPositon.x) == 1) {
+    if (
+      aMapPositon.y == bMapPositon.y &&
+      Math.abs(aMapPositon.x - bMapPositon.x) == 1
+    ) {
       return true;
     }
     if (aMapPositon.x == bMapPositon.x && aMapPositon.y == bMapPositon.y) {
@@ -242,7 +243,7 @@ cc.Class({
    * @param {[type]} Gem_b [description]
    */
   SwapGem(Gem_a, Gem_b) {
-    if(this.checkValidMove(Gem_a, Gem_b)){
+    if (this.checkValidMove(Gem_a, Gem_b)) {
       this.SwapGemValid(Gem_a, Gem_b);
     } else {
       this.SwapGemInvalid(Gem_a, Gem_b);
@@ -253,32 +254,30 @@ cc.Class({
    * @param {[type]} Gem_a [description]
    * @param {[type]} Gem_b [description]
    */
-  SwapGemInvalid(Gem_a, Gem_b){
-    this.GemMoving=true;
+  SwapGemInvalid(Gem_a, Gem_b) {
+    this.GemMoving = true;
     let a_Position = Gem_a.getPosition();
     let b_Position = Gem_b.getPosition();
 
-    let action_a = cc.moveTo(this.move_speed,a_Position);
-    let action_b = cc.moveTo(this.move_speed,b_Position);
+    let action_a = cc.moveTo(this.move_speed, a_Position);
+    let action_b = cc.moveTo(this.move_speed, b_Position);
 
-    let finished = cc.callFunc(function () {
-      this.GemMoving=false;
+    let finished = cc.callFunc(function() {
+      this.GemMoving = false;
     }, this);
 
     Gem_a.setLocalZOrder(1);
-    Gem_a.runAction(cc.sequence(
-      action_b,
-      cc.delayTime(0.1),
-      action_a
-    ));
+    Gem_a.runAction(cc.sequence(action_b, cc.delayTime(0.1), action_a));
     Gem_a.setLocalZOrder(0);
-    Gem_b.runAction(cc.sequence(
-      action_a,
-      cc.delayTime(0.1),
-      action_b,
-      cc.delayTime(0.1),
-      finished
-    ));
+    Gem_b.runAction(
+      cc.sequence(
+        action_a,
+        cc.delayTime(0.1),
+        action_b,
+        cc.delayTime(0.1),
+        finished
+      )
+    );
   },
   /**
    * 交换宝石（可以交换时调用）
@@ -287,38 +286,44 @@ cc.Class({
    *
    */
   SwapGemValid(Gem_a, Gem_b) {
-    this.GemMoving=true;
+    this.GemMoving = true;
     let a_Position = Gem_a.getPosition();
     let b_Position = Gem_b.getPosition();
 
-    let action_a = cc.moveTo(this.move_speed,b_Position);
+    let action_a = cc.moveTo(this.move_speed, b_Position);
     Gem_a.runAction(action_a);
     Gem_a.setLocalZOrder(1);
 
-
-    let finished = cc.callFunc(function () {
-       this.GemMoving=false;
+    let finished = cc.callFunc(function() {
+      this.GemMoving = false;
     }, this);
 
-    let action_b = cc.sequence(cc.moveTo(this.move_speed,a_Position),finished);
+    let action_b = cc.sequence(
+      cc.moveTo(this.move_speed, a_Position),
+      finished
+    );
     Gem_b.runAction(action_b);
     Gem_a.setLocalZOrder(0);
 
     //Gem_a.setPosition(b_Position);
     //Gem_b.setPosition(a_Position);
 
-    let Gemjs_a = Gem_a.getComponent('Gem');
-    let Gemjs_b = Gem_b.getComponent('Gem');
+    let Gemjs_a = Gem_a.getComponent("Gem");
+    let Gemjs_b = Gem_b.getComponent("Gem");
     let aMapPositon = Gemjs_a.getMapPosition();
     let bMapPositon = Gemjs_b.getMapPosition();
 
     let tmp = this.color_map[aMapPositon.x][aMapPositon.y];
-    this.color_map[aMapPositon.x][aMapPositon.y] = this.color_map[bMapPositon.x][bMapPositon.y];
+    this.color_map[aMapPositon.x][aMapPositon.y] = this.color_map[
+      bMapPositon.x
+    ][bMapPositon.y];
     this.color_map[bMapPositon.x][bMapPositon.y] = tmp;
     //swap(this.color_map[aMapPositon.x][aMapPositon.y], this.color_map[bMapPositon.x][bMapPositon.y]);
 
     tmp = this.map[aMapPositon.x][aMapPositon.y];
-    this.map[aMapPositon.x][aMapPositon.y] = this.map[bMapPositon.x][bMapPositon.y];
+    this.map[aMapPositon.x][aMapPositon.y] = this.map[bMapPositon.x][
+      bMapPositon.y
+    ];
     this.map[bMapPositon.x][bMapPositon.y] = tmp;
     //swap(this.map[aMapPositon.x][aMapPositon.y], this.map[bMapPositon.x][bMapPositon.y]);
 
@@ -337,10 +342,10 @@ cc.Class({
   },
   /**
    * 取消鼠标选中
-   * 
+   *
    */
-  delChoosingGem(){
-    if(this.choosing_gem === null) return;
+  delChoosingGem() {
+    if (this.choosing_gem === null) return;
     this.choosing_gem.getComponent("Gem").chooingJpg.active = false;
     this.choosing_gem = null;
   },
@@ -349,11 +354,11 @@ cc.Class({
    * @param {cc.Node} _node 宝石节点
    */
   setChoosingGem(_node) {
-    if(this.choosing_gem !== null){
+    if (this.choosing_gem !== null) {
       this.delChoosingGem();
     }
     this.choosing_gem = _node;
     this.choosing_gem.getComponent("Gem").chooingJpg.active = true;
     // 被选中的宝石添加选中框
-  },
+  }
 });
