@@ -1,4 +1,3 @@
-import lodash from "lodash";
 let config = require("config");
 let Gem = require("Gem");
 let GemColor = Gem["GemColor"];
@@ -40,10 +39,6 @@ cc.Class({
   },
 
   onLoad() {
-    // 创建对象池
-    // TODO
-    this.enemyPool = cc.NodePool();
-
     this.choosing_gem = null;
     const random_of_max_num = this.gems.length;
     for (var x = 0; x < this.height; x++) {
@@ -53,16 +48,6 @@ cc.Class({
         this.color_map[x][y] = this.random_num(0, random_of_max_num - 1);
       }
     }
-    // this.color_map = [
-    //   [1, 2, 3, 4, 5, 4, 1, 1],
-    //   [2, 0, 5, 1, 2, 5, 1, 1],
-    //   [3, 2, 1, 6, 0, 2, 3, 1],
-    //   [4, 3, 5, 3, 2, 5, 4, 3],
-    //   [5, 2, 2, 0, 2, 2, 3, 4],
-    //   [6, 1, 6, 4, 3, 5, 1, 2],
-    //   [1, 2, 3, 5, 5, 6, 5, 1],
-    //   [2, 6, 2, 3, 2, 0, 1, 5]
-    // ];
     cc.log(this.color_map);
 
     for (var x = 0; x < this.height; x++) {
@@ -121,10 +106,10 @@ cc.Class({
       return;
     }
     gem.parent = this.wall; // 绑定到墙上
-    // cc.log(_x, _y);
     gem.getComponent("Gem").setMapPosition(cc.v2(_x, _y));
     /**
      * 此处还需要修改
+     * 改成适应各种宽度的棋盘
      * @todo
      */
     const spacing = this.gem_spacing; // 间距
@@ -137,63 +122,46 @@ cc.Class({
    *
    * @author himself65
    *
-   * @param {*} _x 横轴位置
-   * @param {*} _y 纵轴位置
-   * @param {*} color 颜色
+   * @param {number} _x 横轴位置
+   * @param {number} _y 纵轴位置
+   * @param {number} color 目标颜色，默认无值
+   * @param {*} options
    *
    * @returns {boolean}
    */
-  check_color(_x, _y, color) {
-    /**
-     * 判断一堆值是否相等
-     *
-     * @author himself65
-     */
+  check_color(_x, _y, color = undefined, options) {
+    if (color === undefined) {
+      color = this.color_map[_x][_y];
+    }
     const is_same = (a, b, c) => {
       return a === b && a === c;
     };
 
     let tag = false;
-
     const c_mp = this.color_map;
-    /**
-     * 递归实现检查棋盘
-     *
-     * @param {number} px x轴位置
-     * @param {number} py y轴位置
-     *
-     * @returns {boolean}
-     */
-    const check = (px, py) => {
-      let a, b;
-      if (px - 2 > 0) {
-        a = c_mp[px - 1][py];
-        b = c_mp[px - 2][py];
-        if (is_same(a, b, color)) tag = true;
-      }
-      if (px + 2 < this.width) {
-        a = c_mp[px + 1][py];
-        b = c_mp[px + 2][py];
-        if (is_same(a, b, color)) tag = true;
-      }
-      if (py - 2 > 0) {
-        a = c_mp[px][py - 1];
-        b = c_mp[px][py - 2];
-        if (is_same(a, b, color)) tag = true;
-      }
-      if (px + 2 < this.height) {
-        a = c_mp[px][py + 1];
-        b = c_mp[px][py + 2];
-        if (is_same(a, b, color)) tag = true;
-      }
-    };
-    check(_x, _y);
-    // console.log(is_same(1, 2, 3));
-    // console.log(is_same(1, 1, 1));
-    if (tag === true) {
-      // 换颜色
-    } else {
-      // 无需换颜色gem_size
+    const px = _x;
+    const py = _y;
+    let a, b;
+
+    if (px - 2 > 0) {
+      a = c_mp[px - 1][py];
+      b = c_mp[px - 2][py];
+      if (is_same(a, b, color)) tag = true;
+    }
+    if (px + 2 < this.width) {
+      a = c_mp[px + 1][py];
+      b = c_mp[px + 2][py];
+      if (is_same(a, b, color)) tag = true;
+    }
+    if (py - 2 > 0) {
+      a = c_mp[px][py - 1];
+      b = c_mp[px][py - 2];
+      if (is_same(a, b, color)) tag = true;
+    }
+    if (px + 2 < this.height) {
+      a = c_mp[px][py + 1];
+      b = c_mp[px][py + 2];
+      if (is_same(a, b, color)) tag = true;
     }
     return tag;
   },
@@ -237,6 +205,7 @@ cc.Class({
   checkValidMove(Gem_a, Gem_b) {
     return true;
   },
+
   /**
    * 移动宝石（总）
    * @param {[type]} Gem_a [description]
@@ -249,6 +218,7 @@ cc.Class({
       this.SwapGemInvalid(Gem_a, Gem_b);
     }
   },
+
   /**
    * 无效移动
    * @param {[type]} Gem_a [description]
@@ -279,6 +249,7 @@ cc.Class({
       )
     );
   },
+
   /**
    * 交换宝石（可以交换时调用）
    * @param {cc.Node} Gem_a 第一个宝石
@@ -362,3 +333,19 @@ cc.Class({
     // 被选中的宝石添加选中框
   }
 });
+
+/**
+ * 测试数据
+ */
+function test_map_data() {
+  return [
+    [1, 2, 3, 4, 5, 4, 1, 1],
+    [2, 0, 5, 1, 2, 5, 1, 1],
+    [3, 2, 1, 6, 0, 2, 3, 1],
+    [4, 3, 5, 3, 2, 5, 4, 3],
+    [5, 2, 2, 0, 2, 2, 3, 4],
+    [6, 1, 6, 4, 3, 5, 1, 2],
+    [1, 2, 3, 5, 5, 6, 5, 1],
+    [2, 6, 2, 3, 2, 0, 1, 5]
+  ];
+}
