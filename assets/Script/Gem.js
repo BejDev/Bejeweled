@@ -28,7 +28,7 @@ const GemType = cc.Enum({
 });
 
 let MouseIsOver = false; //鼠标悬停在宝石上
-// 严禁将属性写在Class 外部，详细原因请看 面向对象编程
+// 严禁将非全局属性写在Class 外部，详细原因请看 面向对象编程
 
 cc.Class({
   extends: cc.Component,
@@ -48,15 +48,10 @@ cc.Class({
       default: 60,
       tooltip: "宝石大小"
     },
-    pos_x: {
-      default: -1,
-      visible: false,
-      tooltip: "保存宝石的位置"
-    },
-    pos_y: {
-      default: -1,
-      visible: false,
-      tooltip: "保存宝石的位置"
+    positon: {
+      default: cc.v2(0, 0),
+      type: cc.v2,
+      visiable: false
     }
   },
 
@@ -102,16 +97,11 @@ cc.Class({
           this.game.can_swap(original_gem, this.node) == false
         ) {
           this.game.choosing_gem = this.node;
-          // cc.log(1111);
         } else if (this.game.can_swap(original_gem, this.node) == -1) {
           this.game.choosing_gem = null;
         } else {
-          //cc.log(original_gem.getComponent('Gem').getMapPosition());
-          //cc.log(this.getMapPosition());
-
-          this.game.SwapGem(original_gem, this.node);
+          this.game.swapGem(original_gem, this.node);
           this.game.choosing_gem = null;
-          // cc.log(2222);
         }
       },
       this
@@ -146,8 +136,7 @@ cc.Class({
         if (SwapGems === null) {
           cc.error("validMove is none");
         } else {
-          this.game.SwapGem(this.node, SwapGems);
-          //cc.log(3333);
+          this.game.swapGem(this.node, SwapGems);
         }
       },
       this
@@ -216,6 +205,7 @@ cc.Class({
     }
   }
 });
+
 module.exports = {
   GemColor: GemColor,
   GemType: GemType

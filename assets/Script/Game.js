@@ -86,10 +86,13 @@ cc.Class({
    * @author himself65
    *
    * @param {cc.Prefab} prefab 预制资源
+   * @param {*} options 暂时没用 etc. {name:'himself65', color: 'red'}
    */
   create_gem(prefab, options) {
     let gem = cc.instantiate(prefab);
     // Pre_init
+    // 此处可以根据 options生成
+
     return gem;
   },
 
@@ -145,6 +148,8 @@ cc.Class({
     const py = _y;
     let a, b;
 
+    // 在边角上的宝石会忽略某些方向
+    // 防止出现内存越界
     if (px - 2 > 0) {
       a = c_mp[px - 1][py];
       b = c_mp[px - 2][py];
@@ -205,7 +210,7 @@ cc.Class({
    * @return {boolean}
    */
   checkValidMove(Gem_a, Gem_b) {
-    return false;
+    return true;
   },
 
   /**
@@ -213,11 +218,11 @@ cc.Class({
    * @param {[type]} Gem_a [description]
    * @param {[type]} Gem_b [description]
    */
-  SwapGem(Gem_a, Gem_b) {
+  swapGem(Gem_a, Gem_b) {
     if (this.checkValidMove(Gem_a, Gem_b)) {
-      this.SwapGemValid(Gem_a, Gem_b);
+      this.swapGemValid(Gem_a, Gem_b);
     } else {
-      this.SwapGemInvalid(Gem_a, Gem_b);
+      this.swapGemInvalid(Gem_a, Gem_b);
     }
   },
 
@@ -226,7 +231,7 @@ cc.Class({
    * @param {[type]} Gem_a [description]
    * @param {[type]} Gem_b [description]
    */
-  SwapGemInvalid(Gem_a, Gem_b) {
+  swapGemInvalid(Gem_a, Gem_b) {
     this.GemMoving = true;
     let a_Position = Gem_a.getPosition();
     let b_Position = Gem_b.getPosition();
@@ -258,7 +263,7 @@ cc.Class({
    * @param {cc.Node} Gem_b 第二个宝石
    *
    */
-  SwapGemValid(Gem_a, Gem_b) {
+  swapGemValid(Gem_a, Gem_b) {
     this.GemMoving = true;
     let a_Position = Gem_a.getPosition();
     let b_Position = Gem_b.getPosition();
