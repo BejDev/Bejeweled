@@ -1,5 +1,4 @@
-import lodash from "lodash";
-let config = require("config");
+let config = require("./utils/config");
 let Gem = require("Gem");
 let GemColor = Gem["GemColor"];
 let GemType = Gem["GemType"];
@@ -40,10 +39,6 @@ cc.Class({
   },
 
   onLoad() {
-    // 创建对象池
-    // TODO
-    this.enemyPool = cc.NodePool();
-
     this.choosing_gem = null;
     const random_of_max_num = this.gems.length;
     for (var x = 0; x < this.height; x++) {
@@ -53,16 +48,6 @@ cc.Class({
         this.color_map[x][y] = this.random_num(0, random_of_max_num - 1);
       }
     }
-    // this.color_map = [
-    //   [1, 2, 3, 4, 5, 4, 1, 1],
-    //   [2, 0, 5, 1, 2, 5, 1, 1],
-    //   [3, 2, 1, 6, 0, 2, 3, 1],
-    //   [4, 3, 5, 3, 2, 5, 4, 3],
-    //   [5, 2, 2, 0, 2, 2, 3, 4],
-    //   [6, 1, 6, 4, 3, 5, 1, 2],
-    //   [1, 2, 3, 5, 5, 6, 5, 1],
-    //   [2, 6, 2, 3, 2, 0, 1, 5]
-    // ];
     cc.log(this.color_map);
 
     for (var x = 0; x < this.height; x++) {
@@ -101,9 +86,14 @@ cc.Class({
    * @author himself65
    *
    * @param {cc.Prefab} prefab 预制资源
+   * @param {*} options 暂时没用 etc. {name:'himself65', color: 'red'}
    */
-  create_gem(prefab) {
-    return cc.instantiate(prefab);
+  create_gem(prefab, options) {
+    let gem = cc.instantiate(prefab);
+    // Pre_init
+    // 此处可以根据 options生成
+
+    return gem;
   },
 
   /**
@@ -116,15 +106,15 @@ cc.Class({
    * @param {cc.Prefab} gem 宝石的实例
    */
   set_gem(_x, _y, gem) {
-    if (gem === null) {
+    if (gem === undefined) {
       cc.error("gem is null");
       return;
     }
     gem.parent = this.wall; // 绑定到墙上
-    // cc.log(_x, _y);
-    gem.getComponent('Gem').setMapPosition(cc.v2(_x, _y));
+    gem.getComponent("Gem").setMapPosition(cc.v2(_x, _y));
     /**
      * 此处还需要修改
+     * 改成适应各种宽度的棋盘
      * @todo
      */
     const spacing = this.gem_spacing; // 间距
@@ -137,68 +127,48 @@ cc.Class({
    *
    * @author himself65
    *
-   * @param {*} _x 横轴位置
-   * @param {*} _y 纵轴位置
-   * @param {*} color 颜色
+   * @param {number} _x 横轴位置
+   * @param {number} _y 纵轴位置
+   * @param {number} color 目标颜色，默认无值
+   * @param {*} options
    *
    * @returns {boolean}
    */
-  check_color(_x, _y, color) {
-    /**
-     * 判断一堆值是否相等
-     *
-     * @author himself65
-     */
+  check_color(_x, _y, color = undefined, options) {
+    if (color === undefined) {
+      color = this.color_map[_x][_y];
+    }
     const is_same = (a, b, c) => {
       return a === b && a === c;
     };
 
     let tag = false;
-
-
     const c_mp = this.color_map;
-    /**
-     * 递归实现检查棋盘
-     *
-     * @param {number} px x轴位置
-     * @param {number} py y轴位置
-     * 
-     * @returns {boolean}
-     */
-    const check = (px, py) => {
-      let a, b;
-      if (px - 2 > 0) {
-        a = c_mp[px - 1][py];
-        b = c_mp[px - 2][py];
-        if (is_same(a, b, color))
-          tag = true;
-      }
-      if (px + 2 < this.width) {
-        a = c_mp[px + 1][py];
-        b = c_mp[px + 2][py];
-        if (is_same(a, b, color))
-          tag = true;
-      }
-      if (py - 2 > 0) {
-        a = c_mp[px][py - 1];
-        b = c_mp[px][py - 2];
-        if (is_same(a, b, color))
-          tag = true;
-      }
-      if (px + 2 < this.height) {
-        a = c_mp[px][py + 1];
-        b = c_mp[px][py + 2];
-        if (is_same(a, b, color))
-          tag = true;
-      }
-    };
-    check(_x, _y);
-    // console.log(is_same(1, 2, 3));
-    // console.log(is_same(1, 1, 1));
-    if (tag === true) {
-      // 换颜色
-    } else {
-      // 无需换颜色gem_size
+    const px = _x;
+    const py = _y;
+    let a, b;
+
+    // 在边角上的宝石会忽略某些方向
+    // 防止出现内存越界
+    if (px - 2 > 0) {
+      a = c_mp[px - 1][py];
+      b = c_mp[px - 2][py];
+      if (is_same(a, b, color)) tag = true;
+    }
+    if (px + 2 < this.width) {
+      a = c_mp[px + 1][py];
+      b = c_mp[px + 2][py];
+      if (is_same(a, b, color)) tag = true;
+    }
+    if (py - 2 > 0) {
+      a = c_mp[px][py - 1];
+      b = c_mp[px][py - 2];
+      if (is_same(a, b, color)) tag = true;
+    }
+    if (px + 2 < this.height) {
+      a = c_mp[px][py + 1];
+      b = c_mp[px][py + 2];
+      if (is_same(a, b, color)) tag = true;
     }
     return tag;
   },
@@ -211,14 +181,20 @@ cc.Class({
    * @returns {boolean}
    */
   can_swap(Gem_a, Gem_b) {
-    let Gemjs_a = Gem_a.getComponent('Gem');
-    let Gemjs_b = Gem_b.getComponent('Gem');
+    let Gemjs_a = Gem_a.getComponent("Gem");
+    let Gemjs_b = Gem_b.getComponent("Gem");
     let aMapPositon = Gemjs_a.getMapPosition();
     let bMapPositon = Gemjs_b.getMapPosition();
-    if (aMapPositon.x == bMapPositon.x && Math.abs(aMapPositon.y - bMapPositon.y) == 1) {
+    if (
+      aMapPositon.x == bMapPositon.x &&
+      Math.abs(aMapPositon.y - bMapPositon.y) == 1
+    ) {
       return true;
     }
-    if (aMapPositon.y == bMapPositon.y && Math.abs(aMapPositon.x - bMapPositon.x) == 1) {
+    if (
+      aMapPositon.y == bMapPositon.y &&
+      Math.abs(aMapPositon.x - bMapPositon.x) == 1
+    ) {
       return true;
     }
     if (aMapPositon.x == bMapPositon.x && aMapPositon.y == bMapPositon.y) {
@@ -236,89 +212,96 @@ cc.Class({
   checkValidMove(Gem_a, Gem_b) {
     return true;
   },
+
   /**
    * 移动宝石（总）
    * @param {[type]} Gem_a [description]
    * @param {[type]} Gem_b [description]
    */
-  SwapGem(Gem_a, Gem_b) {
-    if(this.checkValidMove(Gem_a, Gem_b)){
-      this.SwapGemValid(Gem_a, Gem_b);
+  swapGem(Gem_a, Gem_b) {
+    if (this.checkValidMove(Gem_a, Gem_b)) {
+      this.swapGemValid(Gem_a, Gem_b);
     } else {
-      this.SwapGemInvalid(Gem_a, Gem_b);
+      this.swapGemInvalid(Gem_a, Gem_b);
     }
   },
+
   /**
    * 无效移动
    * @param {[type]} Gem_a [description]
    * @param {[type]} Gem_b [description]
    */
-  SwapGemInvalid(Gem_a, Gem_b){
-    this.GemMoving=true;
+  swapGemInvalid(Gem_a, Gem_b) {
+    this.GemMoving = true;
     let a_Position = Gem_a.getPosition();
     let b_Position = Gem_b.getPosition();
 
-    let action_a = cc.moveTo(this.move_speed,a_Position);
-    let action_b = cc.moveTo(this.move_speed,b_Position);
+    let action_a = cc.moveTo(this.move_speed, a_Position);
+    let action_b = cc.moveTo(this.move_speed, b_Position);
 
-    let finished = cc.callFunc(function () {
-      this.GemMoving=false;
+    let finished = cc.callFunc(function() {
+      this.GemMoving = false;
     }, this);
 
     Gem_a.setLocalZOrder(1);
-    Gem_a.runAction(cc.sequence(
-      action_b,
-      cc.delayTime(0.1),
-      action_a
-    ));
+    Gem_a.runAction(cc.sequence(action_b, cc.delayTime(0.1), action_a));
     Gem_a.setLocalZOrder(0);
-    Gem_b.runAction(cc.sequence(
-      action_a,
-      cc.delayTime(0.1),
-      action_b,
-      cc.delayTime(0.1),
-      finished
-    ));
+    Gem_b.runAction(
+      cc.sequence(
+        action_a,
+        cc.delayTime(0.1),
+        action_b,
+        cc.delayTime(0.1),
+        finished
+      )
+    );
   },
+
   /**
    * 交换宝石（可以交换时调用）
    * @param {cc.Node} Gem_a 第一个宝石
    * @param {cc.Node} Gem_b 第二个宝石
    *
    */
-  SwapGemValid(Gem_a, Gem_b) {
-    this.GemMoving=true;
+  swapGemValid(Gem_a, Gem_b) {
+    this.GemMoving = true;
     let a_Position = Gem_a.getPosition();
     let b_Position = Gem_b.getPosition();
 
-    let action_a = cc.moveTo(this.move_speed,b_Position);
+    let action_a = cc.moveTo(this.move_speed, b_Position);
     Gem_a.runAction(action_a);
     Gem_a.setLocalZOrder(1);
 
-
-    let finished = cc.callFunc(function () {
-       this.GemMoving=false;
+    let finished = cc.callFunc(function() {
+      this.GemMoving = false;
     }, this);
 
-    let action_b = cc.sequence(cc.moveTo(this.move_speed,a_Position),finished);
+    let action_b = cc.sequence(
+      cc.moveTo(this.move_speed, a_Position),
+      finished
+    );
     Gem_b.runAction(action_b);
     Gem_a.setLocalZOrder(0);
 
     //Gem_a.setPosition(b_Position);
     //Gem_b.setPosition(a_Position);
 
-    let Gemjs_a = Gem_a.getComponent('Gem');
-    let Gemjs_b = Gem_b.getComponent('Gem');
+    let Gemjs_a = Gem_a.getComponent("Gem");
+    let Gemjs_b = Gem_b.getComponent("Gem");
     let aMapPositon = Gemjs_a.getMapPosition();
     let bMapPositon = Gemjs_b.getMapPosition();
 
     let tmp = this.color_map[aMapPositon.x][aMapPositon.y];
-    this.color_map[aMapPositon.x][aMapPositon.y] = this.color_map[bMapPositon.x][bMapPositon.y];
+    this.color_map[aMapPositon.x][aMapPositon.y] = this.color_map[
+      bMapPositon.x
+    ][bMapPositon.y];
     this.color_map[bMapPositon.x][bMapPositon.y] = tmp;
     //swap(this.color_map[aMapPositon.x][aMapPositon.y], this.color_map[bMapPositon.x][bMapPositon.y]);
 
     tmp = this.map[aMapPositon.x][aMapPositon.y];
-    this.map[aMapPositon.x][aMapPositon.y] = this.map[bMapPositon.x][bMapPositon.y];
+    this.map[aMapPositon.x][aMapPositon.y] = this.map[bMapPositon.x][
+      bMapPositon.y
+    ];
     this.map[bMapPositon.x][bMapPositon.y] = tmp;
     //swap(this.map[aMapPositon.x][aMapPositon.y], this.map[bMapPositon.x][bMapPositon.y]);
 
@@ -337,10 +320,10 @@ cc.Class({
   },
   /**
    * 取消鼠标选中
-   * 
+   *
    */
-  delChoosingGem(){
-    if(this.choosing_gem === null) return;
+  delChoosingGem() {
+    if (this.choosing_gem === null) return;
     this.choosing_gem.getComponent("Gem").chooingJpg.active = false;
     this.choosing_gem = null;
   },
@@ -349,11 +332,27 @@ cc.Class({
    * @param {cc.Node} _node 宝石节点
    */
   setChoosingGem(_node) {
-    if(this.choosing_gem !== null){
+    if (this.choosing_gem !== null) {
       this.delChoosingGem();
     }
     this.choosing_gem = _node;
     this.choosing_gem.getComponent("Gem").chooingJpg.active = true;
     // 被选中的宝石添加选中框
-  },
+  }
 });
+
+/**
+ * 测试数据
+ */
+function test_map_data() {
+  return [
+    [1, 2, 3, 4, 5, 4, 1, 1],
+    [2, 0, 5, 1, 2, 5, 1, 1],
+    [3, 2, 1, 6, 0, 2, 3, 1],
+    [4, 3, 5, 3, 2, 5, 4, 3],
+    [5, 2, 2, 0, 2, 2, 3, 4],
+    [6, 1, 6, 4, 3, 5, 1, 2],
+    [1, 2, 3, 5, 5, 6, 5, 1],
+    [2, 6, 2, 3, 2, 0, 1, 5]
+  ];
+}
