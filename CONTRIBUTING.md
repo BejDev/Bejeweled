@@ -1,3 +1,3 @@
 # Contributing
 
-View in [Contribution List](https://github.com/icy-blue/Bejeweled/wiki/Contribution-List)
+View in [Contribution List](https://github.com/BejDev/Bejeweled/wiki/Contribution-List)
