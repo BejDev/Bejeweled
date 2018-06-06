@@ -171,7 +171,9 @@ cc.Class({
       b = c_mp[px][py + 2];
       if (is_same(a, b, color)) tag = true;
     }
-    callback(tag);
+    if (callback !== undefined) {
+      callback(tag);
+    }
     return tag;
   },
 

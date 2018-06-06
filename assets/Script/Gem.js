@@ -46,7 +46,7 @@ cc.Class({
 
   start() {
     this._wall = this.node.parent;
-    this.game = this.wall.getComponent("Game");
+    this.game = this._wall.getComponent("Game");
     this.game.GemMoving = false;
     this.isMouseOver = false;
   },

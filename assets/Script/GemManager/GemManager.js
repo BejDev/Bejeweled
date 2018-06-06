@@ -18,15 +18,21 @@ cc.Class({
         return this._selectedGems;
       },
       set: function(value) {
-        let gems = this.selectedGems;
+        if (this._selectedGems === undefined) {
+          this._selectedGems = [];
+        }
+        let gems = this._selectedGems;
+
         gems.push(value);
+        cc.log(gems);
         if (gems.length === 2) {
+          
           gems.shift(); // 删除首元素
         }
-        cc.log("hello,world");
       }
     }
   },
+  start() {},
   onLoad() {},
 
   /**
@@ -34,8 +40,8 @@ cc.Class({
    * @param {*} gem
    */
   gemSelected(gem) {
-    
-    this.selectedGem = gem;
+    cc.log("gem被选中");
+    this.selectedGems = gem;
   },
 
   /**
