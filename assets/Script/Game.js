@@ -27,10 +27,6 @@ cc.Class({
     gem_spacing: {
       default: 74,
       tooltip: "宝石间距"
-    },
-    move_speed: {
-      default: 0.2,
-      tooltip: "移动速度"
     }
   },
 
@@ -171,25 +167,12 @@ cc.Class({
   /**
    * 判断移动是否有效
    * @todo
-   * @param  {cc.Node} Gem_a
+   * @param  {cc.Node} gemA
    * @param  {cc.Node} Gem_b
    * @return {boolean}
    */
-  checkValidMove(Gem_a, Gem_b) {
+  checkValidMove(gemA, Gem_b) {
     return true;
-  },
-
-  /**
-   * 移动宝石（总）
-   * @param {[type]} Gem_a [description]
-   * @param {[type]} Gem_b [description]
-   */
-  swapGem(Gem_a, Gem_b) {
-    if (this.checkValidMove(Gem_a, Gem_b)) {
-      this.swapGemValid(Gem_a, Gem_b);
-    } else {
-      this.swapGemInvalid(Gem_a, Gem_b);
-    }
   },
 
   /**
@@ -201,28 +184,6 @@ cc.Class({
   getGem(_x, _y) {
     cc.log(_x, _y);
     return this.map[_x][_y];
-  },
-
-  /**
-   * 取消鼠标选中
-   */
-  delChoosingGem() {
-    if (this.choosing_gem === null) return;
-    this.choosing_gem.getComponent("Gem").chooingJpg.active = false;
-    this.choosing_gem = null;
-  },
-
-  /**
-   * 标记鼠标选中
-   * @param {cc.Node} _node 宝石节点
-   */
-  setChoosingGem(_node) {
-    if (this.choosing_gem !== null) {
-      this.delChoosingGem();
-    }
-    this.choosing_gem = _node;
-    this.choosing_gem.getComponent("Gem").chooingJpg.active = true;
-    // 被选中的宝石添加选中框
   },
 
   /**
@@ -242,14 +203,18 @@ cc.Class({
   },
 
   /**
-   *
+   * @public
+   * @param {cc.Node} gemA
+   * @param {cc.Node} gemB
    */
-  swapGem(Gem_a, Gem_b) {
-    tmp = this.map[aMapPositon.x][aMapPositon.y];
-    this.map[aMapPositon.x][aMapPositon.y] = this.map[bMapPositon.x][
-      bMapPositon.y
-    ];
-    this.map[bMapPositon.x][bMapPositon.y] = tmp;
+  swapGem(gemA, gemB) {
+    let posA = gemA.getComponent("Gem").getMapPosition();
+    let posB = gemB.getComponent("Gem").getMapPosition();
+    // 三元素交换，我记得JavaScript有更简单的办法
+    // - by Himself65
+    const tmp = this.map[posA.x][posA.y];
+    this.map[posA.x][posA.y] = this.map[posB.x][posB.y];
+    this.map[posB.x][posB.y] = tmp;
   }
 });
 

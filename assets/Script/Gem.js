@@ -55,13 +55,6 @@ cc.Class({
     return this.color;
   },
 
-  /**
-   * 获得颜色
-   */
-  getColor() {
-    return this.color;
-  },
-
   onLoad() {
     // 鼠标按下
     this.node.on(
@@ -73,13 +66,36 @@ cc.Class({
       this
     );
   },
+
   /**
-   * 返回宝石在棋盘位置
-   * @returns {cc.v2(x,y)}
+   * 返回在游戏中的绝对位置
+   * @returns {cc.Vec2}
+   */
+  getPosition() {
+    return cc.v2(this.node.x, this.node.y);
+  },
+  /**
+   * 返回在地图上的相对位置
+   * @returns {{x: number,y: number}}
    */
   getMapPosition() {
-    const pos = this.game.getNodePosition(this.node);
-    return cc.v2(pos.x, pos.y);
+    return this._wall.getComponent("Game").getNodePosition(this.node);
+  },
+
+  /**
+   * 返回宝石的颜色
+   * @returns {GemColor}
+   */
+  getColor() {
+    return this.color;
+  },
+
+  /**
+   * 返回宝石类型
+   * @returns {GemType}
+   */
+  getType() {
+    return this.type;
   }
 });
 
