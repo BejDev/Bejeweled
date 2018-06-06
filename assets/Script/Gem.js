@@ -1,8 +1,6 @@
 let Direction = require("./Gem/Direction");
 /**
  * 宝石颜色枚举
- *
- * @author himself65
  */
 const GemColor = cc.Enum({
   WHITE: 0,
@@ -13,11 +11,8 @@ const GemColor = cc.Enum({
   YELLOW: 5,
   PURPLE: 6
 });
-
 /**
  * 宝石类型枚举
- *
- * @author himself65
  */
 const GemType = cc.Enum({
   NORMAL: 0,
@@ -27,7 +22,6 @@ const GemType = cc.Enum({
   STARS: 4 // 超新星
 });
 
-let MouseIsOver = false; //鼠标悬停在宝石上
 // 严禁将非全局属性写在Class 外部，详细原因请看 面向对象编程
 
 cc.Class({
@@ -44,165 +38,64 @@ cc.Class({
       type: GemType,
       tooltip: "宝石类型"
     },
-    gem_size: {
+    gemSize: {
       default: 60,
       tooltip: "宝石大小"
-    },
-    positon: {
-      default: cc.v2(0, 0),
-      type: cc.v2,
-      visiable: false
     }
   },
 
   start() {
-    this.wall = this.node.parent;
-    this.game = this.wall.getComponent("Game");
+    this._wall = this.node.parent;
+    this.game = this._wall.getComponent("Game");
     this.game.GemMoving = false;
+    this.isMouseOver = false;
   },
 
-  get_color() {
+  getColor() {
     return this.color;
   },
 
-  get_XYinMap() {
-    return cc.v2(this.pos_x, this.pos_y);
-  },
-
   onLoad() {
-    cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
-    this.node.on(
-      "mouseenter",
-      function(event) {
-        this.MouseIsOver = true;
-      },
-      this
-    );
-    this.node.on(
-      "mouseleave",
-      function(event) {
-        this.MouseIsOver = false;
-      },
-      this
-    );
+    // 鼠标按下
     this.node.on(
       "mousedown",
       function(event) {
-        if (this.game.GemMoving === true) {
-          return;
-        }
-        let original_gem = this.game.choosing_gem;
-        if (
-          original_gem == null ||
-          this.game.can_swap(original_gem, this.node) == false
-        ) {
-          this.game.choosing_gem = this.node;
-        } else if (this.game.can_swap(original_gem, this.node) == -1) {
-          this.game.choosing_gem = null;
-        } else {
-          this.game.swapGem(original_gem, this.node);
-          this.game.choosing_gem = null;
-        }
+        const GemManagerScript = this._wall.getComponent("GemManager");
+        GemManagerScript.gemSelected(this.node);
       },
       this
     );
-    this.node.on(
-      "touchcancel",
-      function(event) {
-        if (this.game.GemMoving === true) {
-          return;
-        }
-        // cc.log(this.getMapPosition());
-        let pre = event.getStartLocation();
-        let dx = event.getLocationX() - pre.x;
-        let dy = event.getLocationY() - pre.y;
-        //cc.log(dx,dy);
-        let SwapGems = null;
-        if (Math.abs(dx) + Math.abs(dy) >= this.gem_size / 2) {
-          if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 0) {
-              SwapGems = this.game.getGem(this.pos_x + 1, this.pos_y);
-            } else {
-              SwapGems = this.game.getGem(this.pos_x - 1, this.pos_y);
-            }
-          } else {
-            if (dy > 0) {
-              SwapGems = this.game.getGem(this.pos_x, this.pos_y + 1);
-            } else {
-              SwapGems = this.game.getGem(this.pos_x, this.pos_y - 1);
-            }
-          }
-        }
-        if (SwapGems === null) {
-          cc.error("validMove is none");
-        } else {
-          this.game.swapGem(this.node, SwapGems);
-        }
-      },
-      this
-    );
-  },
-  /**
-   * 返回宝石在棋盘位置
-   * @returns {cc.v2(x,y)}
-   */
-  getMapPosition() {
-    return cc.v2(this.pos_x, this.pos_y);
-  },
-  /**
-   * 重置宝石在棋盘位置
-   * @param {cc.v2(x,y)} Position
-   */
-  setMapPosition(Position) {
-    this.pos_x = Position.x;
-    this.pos_y = Position.y;
   },
 
-  onKeyDown(event) {
-    if (this.MouseIsOver !== true || this.game.GemMoving === false) {
-      return;
-    } else {
-      cc.log(this.getMapPosition());
-    }
-    let SwapGem_1 = null;
-    let SwapGem_2 = null;
-    cc.log(this.game.choosing_gem);
-    let hasChoosingGem = -1;
-    if (this.game.choosing_gem !== null) {
-      SwapGem_1 = this.game.choosing_gem;
-      hasChoosingGem = true;
-    } else {
-      SwapGem_1 = this.node;
-      hasChoosingGem = false;
-    }
-    let SwapGemPosition = SwapGem_1.getComponent("Gem").getMapPosition();
-    let _x = SwapGemPosition.x;
-    let _y = SwapGemPosition.y;
-    switch (event.keyCode) {
-      case cc.KEY.a:
-      case cc.KEY.left:
-        SwapGem_2 = this.game.getGem(_x - 1, _y);
-        break;
-      case cc.KEY.d:
-      case cc.KEY.right:
-        SwapGem_2 = this.game.getGem(_x + 1, _y);
-        break;
-      case cc.KEY.w:
-      case cc.KEY.up:
-        SwapGem_2 = this.game.getGem(_x, _y + 1);
-        break;
-      case cc.KEY.s:
-      case cc.KEY.down:
-        SwapGem_2 = this.game.getGem(_x, _y - 1);
-        break;
-      default:
-        cc.log(event.keyCode);
-    }
-    // cc.log(SwapGem_2);
-    this.game.SwapGem(SwapGem_1, SwapGem_2);
-    if (hasChoosingGem == false) {
-      this.game.choosing_gem = null;
-    }
+  /**
+   * 返回在游戏中的绝对位置
+   * @returns {cc.Vec2}
+   */
+  getPosition() {
+    return cc.v2(this.node.x, this.node.y);
+  },
+  /**
+   * 返回在地图上的相对位置
+   * @returns {{x: number,y: number}}
+   */
+  getMapPosition() {
+    return this._wall.getComponent("Game").getNodePosition(this.node);
+  },
+
+  /**
+   * 返回宝石的颜色
+   * @returns {GemColor}
+   */
+  getColor() {
+    return this.color;
+  },
+
+  /**
+   * 返回宝石类型
+   * @returns {GemType}
+   */
+  getType() {
+    return this.type;
   }
 });
 
