@@ -1,8 +1,6 @@
 let Direction = require("./Gem/Direction");
 /**
  * 宝石颜色枚举
- *
- * @author himself65
  */
 const GemColor = cc.Enum({
   WHITE: 0,
@@ -13,11 +11,8 @@ const GemColor = cc.Enum({
   YELLOW: 5,
   PURPLE: 6
 });
-
 /**
  * 宝石类型枚举
- *
- * @author himself65
  */
 const GemType = cc.Enum({
   NORMAL: 0,
@@ -27,7 +22,6 @@ const GemType = cc.Enum({
   STARS: 4 // 超新星
 });
 
-let MouseIsOver = false; //鼠标悬停在宝石上
 // 严禁将非全局属性写在Class 外部，详细原因请看 面向对象编程
 
 cc.Class({
@@ -44,21 +38,17 @@ cc.Class({
       type: GemType,
       tooltip: "宝石类型"
     },
-    gem_size: {
+    gemSize: {
       default: 60,
       tooltip: "宝石大小"
-    },
-    positon: {
-      default: cc.v2(0, 0),
-      type: cc.v2,
-      visiable: false
     }
   },
 
   start() {
-    this.wall = this.node.parent;
+    this._wall = this.node.parent;
     this.game = this.wall.getComponent("Game");
     this.game.GemMoving = false;
+    this.isMouseOver = false;
   },
 
   get_color() {
@@ -69,75 +59,41 @@ cc.Class({
     return cc.v2(this.pos_x, this.pos_y);
   },
 
+  /**
+   * 获得颜色
+   */
+  getColor() {
+    return this.color;
+  },
+
   onLoad() {
     cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+
+    // 鼠标移入区域内时候触发
     this.node.on(
       "mouseenter",
       function(event) {
-        this.MouseIsOver = true;
+        this.isMouseOver = true;
       },
       this
     );
+
+    // 鼠标移出区域内时候触发
     this.node.on(
       "mouseleave",
       function(event) {
-        this.MouseIsOver = false;
+        this.isMouseOver = false;
       },
       this
     );
+
+    // 鼠标按下
     this.node.on(
       "mousedown",
       function(event) {
-        if (this.game.GemMoving === true) {
-          return;
-        }
-        let original_gem = this.game.choosing_gem;
-        if (
-          original_gem == null ||
-          this.game.can_swap(original_gem, this.node) == false
-        ) {
-          this.game.choosing_gem = this.node;
-        } else if (this.game.can_swap(original_gem, this.node) == -1) {
-          this.game.choosing_gem = null;
-        } else {
-          this.game.swapGem(original_gem, this.node);
-          this.game.choosing_gem = null;
-        }
-      },
-      this
-    );
-    this.node.on(
-      "touchcancel",
-      function(event) {
-        if (this.game.GemMoving === true) {
-          return;
-        }
-        // cc.log(this.getMapPosition());
-        let pre = event.getStartLocation();
-        let dx = event.getLocationX() - pre.x;
-        let dy = event.getLocationY() - pre.y;
-        //cc.log(dx,dy);
-        let SwapGems = null;
-        if (Math.abs(dx) + Math.abs(dy) >= this.gem_size / 2) {
-          if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 0) {
-              SwapGems = this.game.getGem(this.pos_x + 1, this.pos_y);
-            } else {
-              SwapGems = this.game.getGem(this.pos_x - 1, this.pos_y);
-            }
-          } else {
-            if (dy > 0) {
-              SwapGems = this.game.getGem(this.pos_x, this.pos_y + 1);
-            } else {
-              SwapGems = this.game.getGem(this.pos_x, this.pos_y - 1);
-            }
-          }
-        }
-        if (SwapGems === null) {
-          cc.error("validMove is none");
-        } else {
-          this.game.swapGem(this.node, SwapGems);
-        }
+        // TEST
+        const GemManagerScript = this._wall.getComponent("GemManager");
+        GemManagerScript.gemSelected(this);
       },
       this
     );
@@ -158,48 +114,51 @@ cc.Class({
     this.pos_y = Position.y;
   },
 
+  /**
+   * 键盘按下事件
+   * @param {*} event
+   */
   onKeyDown(event) {
-    if (this.MouseIsOver !== true || this.game.GemMoving === false) {
+    if (this.isMouseOver !== true || this.game.GemMoving === false) {
       return;
     } else {
       cc.log(this.getMapPosition());
     }
-    let SwapGem_1 = null;
-    let SwapGem_2 = null;
+    let swapGem1, swapGem2;
     cc.log(this.game.choosing_gem);
     let hasChoosingGem = -1;
     if (this.game.choosing_gem !== null) {
-      SwapGem_1 = this.game.choosing_gem;
+      swapGem1 = this.game.choosing_gem;
       hasChoosingGem = true;
     } else {
-      SwapGem_1 = this.node;
+      swapGem1 = this.node;
       hasChoosingGem = false;
     }
-    let SwapGemPosition = SwapGem_1.getComponent("Gem").getMapPosition();
+    let SwapGemPosition = swapGem1.getComponent("Gem").getMapPosition();
     let _x = SwapGemPosition.x;
     let _y = SwapGemPosition.y;
     switch (event.keyCode) {
       case cc.KEY.a:
       case cc.KEY.left:
-        SwapGem_2 = this.game.getGem(_x - 1, _y);
+        swapGem2 = this.game.getGem(_x - 1, _y);
         break;
       case cc.KEY.d:
       case cc.KEY.right:
-        SwapGem_2 = this.game.getGem(_x + 1, _y);
+        swapGem2 = this.game.getGem(_x + 1, _y);
         break;
       case cc.KEY.w:
       case cc.KEY.up:
-        SwapGem_2 = this.game.getGem(_x, _y + 1);
+        swapGem2 = this.game.getGem(_x, _y + 1);
         break;
       case cc.KEY.s:
       case cc.KEY.down:
-        SwapGem_2 = this.game.getGem(_x, _y - 1);
+        swapGem2 = this.game.getGem(_x, _y - 1);
         break;
       default:
         cc.log(event.keyCode);
     }
-    // cc.log(SwapGem_2);
-    this.game.SwapGem(SwapGem_1, SwapGem_2);
+    // cc.log(swapGem2);
+    this.game.SwapGem(swapGem1, swapGem2);
     if (hasChoosingGem == false) {
       this.game.choosing_gem = null;
     }

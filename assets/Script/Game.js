@@ -111,7 +111,8 @@ cc.Class({
       return;
     }
     gem.parent = this.wall; // 绑定到墙上
-    gem.getComponent("Gem").setMapPosition(cc.v2(_x, _y));
+    let sprite = gem.getComponent("Gem");
+    sprite.setMapPosition(cc.v2(_x, _y));
     /**
      * 此处还需要修改
      * 改成适应各种宽度的棋盘
@@ -130,11 +131,11 @@ cc.Class({
    * @param {number} _x 横轴位置
    * @param {number} _y 纵轴位置
    * @param {number} color 目标颜色，默认无值
-   * @param {*} options
+   * @param {function} callback callback function
    *
    * @returns {boolean}
    */
-  check_color(_x, _y, color = undefined, options) {
+  check_color(_x, _y, color = undefined, callback) {
     if (color === undefined) {
       color = this.color_map[_x][_y];
     }
@@ -170,6 +171,7 @@ cc.Class({
       b = c_mp[px][py + 2];
       if (is_same(a, b, color)) tag = true;
     }
+    callback(tag);
     return tag;
   },
 
@@ -318,15 +320,16 @@ cc.Class({
     cc.log(_x, _y);
     return this.map[_x][_y];
   },
+
   /**
    * 取消鼠标选中
-   *
    */
   delChoosingGem() {
     if (this.choosing_gem === null) return;
     this.choosing_gem.getComponent("Gem").chooingJpg.active = false;
     this.choosing_gem = null;
   },
+
   /**
    * 标记鼠标选中
    * @param {cc.Node} _node 宝石节点
@@ -356,3 +359,9 @@ function test_map_data() {
     [2, 6, 2, 3, 2, 0, 1, 5]
   ];
 }
+
+/**
+ *
+ * @param {cc.Node} node
+ */
+function getNodePositon(node) {}
