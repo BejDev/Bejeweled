@@ -18,13 +18,16 @@ cc.Class({
         }
         let gems = this._selectedGems;
 
+        value.getComponent("Gem").selected = true;
         gems.push(value);
         cc.log(gems);
         if (gems.length === 2) {
           if (this.isNear(gems[0], gems[1])) {
             this.swapGem(gems[0], gems[1]);
           }
-          gems.shift(); // 删除首元素
+          gems[0].getComponent("Gem").selected = false;
+          gems.shift();
+          gems.shift();
         }
       },
       visible: false
@@ -131,8 +134,8 @@ cc.Class({
     const actionToB = cc.moveTo(moveSpeed, gemBPos);
     gemA.setLocalZOrder(1);
     gemA.runAction(actionToB);
-    gemB.runAction(actionToA);
     gemA.setLocalZOrder(0);
+    gemB.runAction(actionToA);
     // 结束时候保存信息
     const script = this.node.getComponent("Game");
     script.swapGem(gemA, gemB);

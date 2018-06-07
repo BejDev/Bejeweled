@@ -41,6 +41,19 @@ cc.Class({
     gemSize: {
       default: 60,
       tooltip: "宝石大小"
+    },
+    selected: {
+      get: function() {
+        return this._selected;
+      },
+      set: function(value) {
+        this._selected = value;
+        if (value) {
+          // 被选中
+        } else {
+          // 没被选中
+        }
+      }
     }
   },
 
