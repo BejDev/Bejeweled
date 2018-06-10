@@ -10,7 +10,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "selectedOutline",
+    "_name": "SelectedOutline",
     "_objFlags": 0,
     "_parent": null,
     "_children": [],

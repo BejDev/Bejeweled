@@ -69,7 +69,7 @@ cc.Class({
     this.node.on(
       "mousedown",
       function(event) {
-        cc.log(this.getMapPosition().x, this.getMapPosition().y);
+        // cc.log(this.getMapPosition().x, this.getMapPosition().y);
         const GemManagerScript = this._wall.getComponent("GemManager");
         GemManagerScript.gemSelected(this.node);
       },

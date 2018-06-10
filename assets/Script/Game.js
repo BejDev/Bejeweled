@@ -54,10 +54,10 @@ cc.Class({
         const prefab = this.gems[color];
         let gem = this.createGem(prefab);
         this.setGem(x, y, gem);
-        cc.log(x, y, color);
+        // cc.log(x, y, color);
       }
     }
-    cc.log(this.colorMap);
+    // cc.log(this.colorMap);
   },
 
   /**
@@ -180,7 +180,7 @@ cc.Class({
    * @returns {cc.Node}
    */
   getGem(_x, _y) {
-    cc.log(_x, _y);
+    // cc.log(_x, _y);
     return this.map[_x][_y];
   },
 

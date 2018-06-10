@@ -62,7 +62,7 @@ cc.Class({
       this.scheduleOnce(function() {
         this.clearGem(Gem1);
         this.clearGem(Gem2);
-      }, this.moveSpeed);
+      }, this.moveSpeed * 1.5);
     } else {
       this._swapGemInvalid(Gem1, Gem2);
       script.swapGem(Gem1, Gem2);//换回来
@@ -74,17 +74,8 @@ cc.Class({
    */
   _checkGemMap(Gem1, Gem2) {
     let tag = false;
-    const script = this.node.getComponent("Game");
-    const _x1 = script.getNodePosition(Gem1).x;
-    const _y1 = script.getNodePosition(Gem1).y;
-    const _x2 = script.getNodePosition(Gem2).x;
-    const _y2 = script.getNodePosition(Gem2).y;
-    for(var x = -1; x <= 1; x++){
-      for(var y = -1; y <= 1; y++){
-        tag = tag | script.checkColor(_x1 + x, _y1 + y);
-        tag = tag | script.checkColor(_x2 + x, _y2 + y);
-      }
-    }
+    tag = tag | this.ceshi(Gem1);
+    tag = tag | this.ceshi(Gem2);
     return tag;
   },
 
@@ -192,5 +183,33 @@ cc.Class({
         delGem.destroy();
       }
     }
+  },
+  /**
+   * 测试bug，等待重构
+   *
+   * @param      {cc.Node}  Gem     The gem
+   * @return     {number}  意思见注释
+   */
+  ceshi(Gem){
+    const script = this.node.getComponent("Game");
+    const _map = script.colorMap;
+    const _x = script.getNodePosition(Gem).x;
+    const _y = script.getNodePosition(Gem).y;
+    let tag = 0;
+    // tag = 0 不可消除
+    // tag = 1 横向可消除
+    // tag = 2 纵向可消除
+    // tag = 3 横竖可消除
+    let _up = _y, _dn = _y;
+    while(_up >= 0 && _map[_x][_up] == _map[_x][_y]) _up--;
+    while(_dn < script.width && _map[_x][_dn] == _map[_x][_y]) _dn++;
+    if(_dn - _up >= 4) tag = tag | 2;
+
+    let _lt = _x, _rt = _x;
+    while(_lt >= 0 && _map[_lt][_y] == _map[_x][_y]) _lt--;
+    while(_rt < script.height && _map[_rt][_y] == _map[_x][_y]) _rt++;
+    if(_rt - _lt >= 4) tag = tag | 1;
+
+    return tag;
   }
 });
