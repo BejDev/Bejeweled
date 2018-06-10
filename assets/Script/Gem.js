@@ -16,10 +16,11 @@ const GemColor = cc.Enum({
  */
 const GemType = cc.Enum({
   NORMAL: 0,
-  FLAME: 1, // 火焰
-  LIGHT: 2, // 闪电
-  SUPER: 3, // 超能
-  STARS: 4 // 超新星
+  LIGHT: 1, // 闪电
+  FLAME: 4, // 火焰
+  SUPER: 5, // 超能
+  STARS: 6 // 超新星
+
 });
 
 // 严禁将非全局属性写在Class 外部，详细原因请看 面向对象编程
@@ -61,11 +62,6 @@ cc.Class({
     this._wall = this.node.parent;
     this.game = this._wall.getComponent("Game");
     this.game.GemMoving = false;
-    this.isMouseOver = false;
-  },
-
-  getColor() {
-    return this.color;
   },
 
   onLoad() {
@@ -73,6 +69,7 @@ cc.Class({
     this.node.on(
       "mousedown",
       function(event) {
+        cc.log(this.getMapPosition().x, this.getMapPosition().y);
         const GemManagerScript = this._wall.getComponent("GemManager");
         GemManagerScript.gemSelected(this.node);
       },

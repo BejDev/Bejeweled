@@ -44,7 +44,7 @@ cc.Class({
    * @param {cc.Node} gem
    */
   gemSelected(gem) {
-    // cc.log("gem被选中");
+    // cc.log("gem selected.");
     this.selectedGems = gem;
   },
 
@@ -59,6 +59,10 @@ cc.Class({
     script.swapGem(Gem1, Gem2);
     if(this._checkGemMap(Gem1, Gem2)){
       this._swapGemValid(Gem1, Gem2);
+      this.scheduleOnce(function() {
+        this.clearGem(Gem1);
+        this.clearGem(Gem2);
+      }, this.moveSpeed);
     } else {
       this._swapGemInvalid(Gem1, Gem2);
       script.swapGem(Gem1, Gem2);//换回来
@@ -87,17 +91,17 @@ cc.Class({
   /**
    * 检查是否相邻
    * @public
-   * @param {cc.Node} gemA 第一个宝石
-   * @param {cc.Node} gemB 第二个宝石
+   * @param {cc.Node} Gem1 第一个宝石
+   * @param {cc.Node} Gem2 第二个宝石
    *
    * @returns {boolean}
    */
-  isNear(gemA, gemB) {
-    let Gemjs_a = gemA.getComponent("Gem");
-    let Gemjs_b = gemB.getComponent("Gem");
+  isNear(Gem1, Gem2) {
+    let Gemjs_a = Gem1.getComponent("Gem");
+    let Gemjs_b = Gem2.getComponent("Gem");
     const script = this.node.getComponent("Game");
-    const pa = script.getNodePosition(gemA);
-    const pb = script.getNodePosition(gemB);
+    const pa = script.getNodePosition(Gem1);
+    const pb = script.getNodePosition(Gem2);
     if (pa === null || pb == null) {
       cc.error("找不到位置");
     }
@@ -110,13 +114,13 @@ cc.Class({
   /**
    * 无效移动
    * @private
-   * @param {cc.Node} gemA 第一个宝石
-   * @param {cc.Node} gemB 第二个宝石
+   * @param {cc.Node} Gem1 第一个宝石
+   * @param {cc.Node} Gem2 第二个宝石
    */
-  _swapGemInvalid(gemA, gemB) {
+  _swapGemInvalid(Gem1, Gem2) {
     const moveSpeed = this.moveSpeed;
-    const gemAScript = gemA.getComponent("Gem");
-    const gemBScript = gemB.getComponent("Gem");
+    const gemAScript = Gem1.getComponent("Gem");
+    const gemBScript = Gem2.getComponent("Gem");
     const gemAPos = gemAScript.getPosition();
     const gemBPos = gemBScript.getPosition();
     const actionToA = cc.moveTo(moveSpeed, gemAPos);
@@ -124,29 +128,69 @@ cc.Class({
     const sleepTime = cc.delayTime(0.1);
     let seqA = cc.sequence(actionToB, sleepTime, actionToA);
     let seqB = cc.sequence(actionToA, sleepTime, actionToB);
-    gemA.setLocalZOrder(1);
-    gemA.runAction(seqA);
-    gemB.runAction(seqB);
-    gemA.setLocalZOrder(0);
+    Gem1.setLocalZOrder(1);
+    Gem1.runAction(seqA);
+    Gem2.runAction(seqB);
+    Gem1.setLocalZOrder(0);
   },
 
   /**
    * 交换宝石（可以交换时调用）
    * @private
-   * @param {cc.Node} gemA 第一个宝石
-   * @param {cc.Node} gemB 第二个宝石
+   * @param {cc.Node} Gem1 第一个宝石
+   * @param {cc.Node} Gem2 第二个宝石
    */
-  _swapGemValid(gemA, gemB) {
+  _swapGemValid(Gem1, Gem2) {
     const moveSpeed = this.moveSpeed;
-    const gemAScript = gemA.getComponent("Gem");
-    const gemBScript = gemB.getComponent("Gem");
+    const gemAScript = Gem1.getComponent("Gem");
+    const gemBScript = Gem2.getComponent("Gem");
     const gemAPos = gemAScript.getPosition();
     const gemBPos = gemBScript.getPosition();
     const actionToA = cc.moveTo(moveSpeed, gemAPos);
     const actionToB = cc.moveTo(moveSpeed, gemBPos);
-    gemA.setLocalZOrder(1);
-    gemA.runAction(actionToB);
-    gemB.runAction(actionToA);
-    gemA.setLocalZOrder(0);
+    Gem1.setLocalZOrder(1);
+    Gem1.runAction(actionToB);
+    Gem2.runAction(actionToA);
+    Gem1.setLocalZOrder(0);
+  },
+  /**
+   * 以该宝石向四周搜索联系宝石
+   *
+   * @param {cc.Node} Gem The gem
+   */
+  clearGem(Gem) {
+    const script = this.node.getComponent("Game");
+    const _map = script.colorMap;
+    const _x = script.getNodePosition(Gem).x;
+    const _y = script.getNodePosition(Gem).y;
+    let tag = 0;
+    // tag = 0 不可消除
+    // tag = 1 横向可消除
+    // tag = 2 纵向可消除
+    // tag = 3 横竖可消除
+    let _up = _y, _dn = _y;
+    while(_up >= 0 && _map[_x][_up] == _map[_x][_y]) _up--;
+    while(_dn < script.width && _map[_x][_dn] == _map[_x][_y]) _dn++;
+    if(_dn - _up >= 4) tag = tag | 2;
+
+    let _lt = _x, _rt = _x;
+    while(_lt >= 0 && _map[_lt][_y] == _map[_x][_y]) _lt--;
+    while(_rt < script.height && _map[_rt][_y] == _map[_x][_y]) _rt++;
+    if(_rt - _lt >= 4) tag = tag | 1;
+
+    const maxMatch = Math.max(_dn - _up, _rt - _lt) - 1;
+    // tag 和 maxMatch 帮助生成特殊宝石
+    if(tag & 2) {
+      for(var y = _up + 1; y < _dn; y++) {
+        let delGem = script.getGem(_x, y);
+        delGem.destroy();
+      }
+    }
+    if(tag & 1) {
+      for(var x = _lt + 1; x < _rt; x++) {
+        let delGem = script.getGem(x, _y);
+        delGem.destroy();
+      }
+    }
   }
 });

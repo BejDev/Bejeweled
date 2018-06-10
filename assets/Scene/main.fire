@@ -295,7 +295,7 @@
     },
     "_enabled": true,
     "map": [],
-    "color_map": [],
+    "colorMap": [],
     "width": 8,
     "height": 8,
     "wall": {
@@ -303,7 +303,13 @@
     },
     "gems": [
       {
+        "__uuid__": "a6d93fc1-2fd5-46f4-aa6f-e156c1f0ee30"
+      },
+      {
         "__uuid__": "0d635b0b-f30e-4911-b78f-5f6a63a85281"
+      },
+      {
+        "__uuid__": "1d3c1ed2-27a6-4a62-b500-a83831edaf31"
       },
       {
         "__uuid__": "f015e85a-a486-45d3-9828-1afc2781d9db"
@@ -312,20 +318,13 @@
         "__uuid__": "286a0ae3-bf2e-4e8e-9395-af2d5ff2f25b"
       },
       {
-        "__uuid__": "23a6f803-92d8-47d5-9234-ea3a3c81a293"
-      },
-      {
-        "__uuid__": "1d3c1ed2-27a6-4a62-b500-a83831edaf31"
-      },
-      {
-        "__uuid__": "a6d93fc1-2fd5-46f4-aa6f-e156c1f0ee30"
-      },
-      {
         "__uuid__": "dce7150b-b0a1-4e72-8ecd-24b56f703550"
+      },
+      {
+        "__uuid__": "23a6f803-92d8-47d5-9234-ea3a3c81a293"
       }
     ],
-    "gem_spacing": 72.5,
-    "move_speed": 0.2
+    "gem_spacing": 72.5
   },
   {
     "__type__": "e6ffec0QRhNjrl9M5TXk85z",
@@ -335,7 +334,8 @@
       "__id__": 6
     },
     "_enabled": true,
-    "chosenOutline": null
+    "chosenOutline": null,
+    "moveSpeed": 0.2
   },
   {
     "__type__": "cc.Node",
