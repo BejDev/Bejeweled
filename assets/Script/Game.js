@@ -47,7 +47,7 @@ cc.Class({
     for (var x = 0; x < this.height; x++) {
       for (var y = 0; y < this.width; y++) {
         let color = this.colorMap[x][y];
-        while (this.checkColor(x, y, color, this.colorMap)) {
+        while (this.checkColor(x, y, color)) {
           color = this.randomNumber(0, random_of_max_num - 1);
         }
         this.colorMap[x][y] = color;
@@ -126,6 +126,11 @@ cc.Class({
    * @returns {boolean}
    */
   checkColor(_x, _y, color, callback) {
+    //input invalid
+    if(_x < 0 || _y < 0 || _x >= this.width || _y >= this.height){
+      return false;
+    }
+
     if (color === undefined) {
       color = this.colorMap[_x][_y];
     }
@@ -138,7 +143,6 @@ cc.Class({
     const px = _x;
     const py = _y;
     let a, b;
-
     // 在边角上的宝石会忽略某些方向
     // 防止出现内存越界
     if (px - 2 > 0) {
@@ -195,6 +199,7 @@ cc.Class({
   },
 
   /**
+   * 更新map存储
    * @public
    * @param {cc.Node} gemA
    * @param {cc.Node} gemB
@@ -204,9 +209,15 @@ cc.Class({
     let posB = gemB.getComponent("Gem").getMapPosition();
     // 三元素交换，我记得JavaScript有更简单的办法
     // - by Himself65
-    const tmp = this.map[posA.x][posA.y];
+    // @icy: 如果有我早写了
+    let tmp = this.map[posA.x][posA.y];
     this.map[posA.x][posA.y] = this.map[posB.x][posB.y];
     this.map[posB.x][posB.y] = tmp;
+    // cc.log(this.colorMap[posA.x][posA.y], this.colorMap[posB.x][posB.y]);
+    tmp = this.colorMap[posA.x][posA.y];
+    this.colorMap[posA.x][posA.y] = this.colorMap[posB.x][posB.y];
+    this.colorMap[posB.x][posB.y] = tmp;
+    // cc.log(this.colorMap[posA.x][posA.y], this.colorMap[posB.x][posB.y]);
   }
 });
 
