@@ -19,12 +19,13 @@ cc.Class({
         let gems = this._selectedGems;
 
         gems.push(value);
-        cc.log(gems);
+        // cc.log(gems);
         if (gems.length === 2) {
           if (this.isNear(gems[0], gems[1])) {
             this.swapGem(gems[0], gems[1]);
           }
-          gems.shift(); // 删除首元素
+          // gems.shift(); // 删除所有元素
+          this._selectedGems = undefined;
         }
       },
       visible: false
@@ -41,7 +42,7 @@ cc.Class({
    * @param {cc.Node} gem
    */
   gemSelected(gem) {
-    cc.log("gem被选中");
+    // cc.log("gem被选中");
     this.selectedGems = gem;
   },
 
@@ -52,7 +53,7 @@ cc.Class({
    * @param {cc.Node} Gem2
    */
   swapGem(Gem1, Gem2) {
-    this._swapGemValid(Gem1, Gem2);
+    this._swapGemInvalid(Gem1, Gem2);
   },
 
   /**
@@ -61,13 +62,6 @@ cc.Class({
   _checkGemMap(Gem1, Gem2) {
     const script = this.node.getComponent("Game");
   },
-
-  /**
-   * 检查是否能交换
-   * @param {cc.Node} gemA
-   * @param {cc.Node} gemB
-   */
-  canSwap(gemA, gemB) {},
 
   /**
    * 检查是否相邻

@@ -3,12 +3,16 @@ let Gem = require("Gem");
 let GemColor = Gem["GemColor"];
 let GemType = Gem["GemType"];
 
-let choosing_gem = null; //被单击选中的宝石
 let GemMoving = false;
+let GemFalling = false;
 cc.Class({
   extends: cc.Component,
   properties: {
     map: {
+      default: [],
+      visible: false
+    },
+    colorMap: {
       default: [],
       visible: false
     },
@@ -31,24 +35,22 @@ cc.Class({
   },
 
   onLoad() {
-    this.choosing_gem = null;
-    let colorMap = [];
     const random_of_max_num = this.gems.length;
     for (var x = 0; x < this.height; x++) {
       this.map[x] = [];
-      colorMap[x] = [];
+      this.colorMap[x] = [];
       for (var y = 0; y < this.width; y++) {
-        colorMap[x][y] = this.randomNumber(0, random_of_max_num - 1);
+        this.colorMap[x][y] = this.randomNumber(0, random_of_max_num - 1);
       }
     }
 
     for (var x = 0; x < this.height; x++) {
       for (var y = 0; y < this.width; y++) {
-        let color = colorMap[x][y];
-        while (this.checkColor(x, y, color, colorMap)) {
+        let color = this.colorMap[x][y];
+        while (this.checkColor(x, y, color, this.colorMap)) {
           color = this.randomNumber(0, random_of_max_num - 1);
         }
-        colorMap[x][y] = color;
+        this.colorMap[x][y] = color;
         const prefab = this.gems[color];
         let gem = this.createGem(prefab);
         this.setGem(x, y, gem);
@@ -123,16 +125,16 @@ cc.Class({
    *
    * @returns {boolean}
    */
-  checkColor(_x, _y, color, colorMap, callback) {
+  checkColor(_x, _y, color, this.colorMap, callback) {
     if (color === undefined) {
-      color = colorMap[_x][_y];
+      color = this.colorMap[_x][_y];
     }
     const is_same = (a, b, c) => {
       return a === b && a === c;
     };
 
     let tag = false;
-    const c_mp = colorMap;
+    const c_mp = this.colorMap;
     const px = _x;
     const py = _y;
     let a, b;
@@ -163,16 +165,6 @@ cc.Class({
       callback(tag);
     }
     return tag;
-  },
-  /**
-   * 判断移动是否有效
-   * @todo
-   * @param  {cc.Node} gemA
-   * @param  {cc.Node} Gem_b
-   * @return {boolean}
-   */
-  checkValidMove(gemA, Gem_b) {
-    return true;
   },
 
   /**
