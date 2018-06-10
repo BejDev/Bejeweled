@@ -18,14 +18,16 @@ cc.Class({
         }
         let gems = this._selectedGems;
 
+        value.getComponent("Gem").selected = true;
         gems.push(value);
         // cc.log(gems);
         if (gems.length === 2) {
           if (this.isNear(gems[0], gems[1])) {
             this.swapGem(gems[0], gems[1]);
           }
-          // gems.shift(); // 删除所有元素
-          this._selectedGems = undefined;
+          gems[0].getComponent("Gem").selected = false;
+          gems.shift();
+          gems.shift();
         }
       },
       visible: false
@@ -105,8 +107,8 @@ cc.Class({
     let seqB = cc.sequence(actionToA, sleepTime, actionToB);
     gemA.setLocalZOrder(1);
     gemA.runAction(seqA);
-    gemA.setLocalZOrder(0);
     gemB.runAction(seqB);
+    gemA.setLocalZOrder(0);
   },
 
   /**
