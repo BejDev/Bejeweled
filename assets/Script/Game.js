@@ -125,7 +125,7 @@ cc.Class({
    *
    * @returns {boolean}
    */
-  checkColor(_x, _y, color, this.colorMap, callback) {
+  checkColor(_x, _y, color, callback) {
     if (color === undefined) {
       color = this.colorMap[_x][_y];
     }
