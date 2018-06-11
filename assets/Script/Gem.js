@@ -65,7 +65,6 @@ cc.Class({
     this.game = this._wall.getComponent("Game");
     this.GemMoving = false;
     this.GemFalling = false;
-    // cc.log(this.getMapPosition());
     if(this.getMapPosition().y >= this.game.width) {
       this.node.opacity = 0;
     }
