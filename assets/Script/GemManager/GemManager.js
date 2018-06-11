@@ -32,13 +32,13 @@ cc.Class({
       },
       visible: false
     },
-    moveSpeed: {
+    moveTime: {
       default: 0.2,
-      tooltip: "宝石移动速度"
+      tooltip: "宝石移动时间"
     },
-    fallSpeed: {
-      default: 0.2,
-      tooltip: "下落速度/格"
+    fallTime: {
+      default: 0.3,
+      tooltip: "下落时间"
     }
   },
 
@@ -59,6 +59,10 @@ cc.Class({
    * @param {cc.Node} Gem2
    */
   swapGem(Gem1, Gem2) {
+    let Gemjs_a = Gem1.getComponent("Gem");
+    let Gemjs_b = Gem2.getComponent("Gem");
+    Gemjs_a.GemMoving = true;
+    Gemjs_b.GemMoving = true;
     const script = this.node.getComponent("Game");
     script.swapGem(Gem1, Gem2);
     if(this._checkGemMap(Gem1, Gem2)){
@@ -66,11 +70,14 @@ cc.Class({
       this.scheduleOnce(function() {
         this.clearGem(Gem1);
         this.clearGem(Gem2);
-      }, this.moveSpeed * 1.5);
+        this.GemFall();
+      }, this.moveTime * 1.5);
     } else {
       this._swapGemInvalid(Gem1, Gem2);
       script.swapGem(Gem1, Gem2);//换回来
     }
+    Gemjs_a.GemMoving = false;
+    Gemjs_b.GemMoving = false;
   },
 
   /**
@@ -98,6 +105,10 @@ cc.Class({
   isNear(Gem1, Gem2) {
     let Gemjs_a = Gem1.getComponent("Gem");
     let Gemjs_b = Gem2.getComponent("Gem");
+
+    if(Gemjs_a.GemFalling || Gemjs_a.GemMoving) return false;
+    if(Gemjs_b.GemFalling || Gemjs_b.GemMoving) return false;
+
     const script = this.node.getComponent("Game");
     const pa = script.getNodePosition(Gem1);
     const pb = script.getNodePosition(Gem2);
@@ -117,13 +128,13 @@ cc.Class({
    * @param {cc.Node} Gem2 第二个宝石
    */
   _swapGemInvalid(Gem1, Gem2) {
-    const moveSpeed = this.moveSpeed;
+    const moveTime = this.moveTime;
     const gemAScript = Gem1.getComponent("Gem");
     const gemBScript = Gem2.getComponent("Gem");
     const gemAPos = gemAScript.getPosition();
     const gemBPos = gemBScript.getPosition();
-    const actionToA = cc.moveTo(moveSpeed, gemAPos);
-    const actionToB = cc.moveTo(moveSpeed, gemBPos);
+    const actionToA = cc.moveTo(moveTime, gemAPos);
+    const actionToB = cc.moveTo(moveTime, gemBPos);
     const sleepTime = cc.delayTime(0.1);
     let seqA = cc.sequence(actionToB, sleepTime, actionToA);
     let seqB = cc.sequence(actionToA, sleepTime, actionToB);
@@ -140,13 +151,13 @@ cc.Class({
    * @param {cc.Node} Gem2 第二个宝石
    */
   _swapGemValid(Gem1, Gem2) {
-    const moveSpeed = this.moveSpeed;
+    const moveTime = this.moveTime;
     const gemAScript = Gem1.getComponent("Gem");
     const gemBScript = Gem2.getComponent("Gem");
     const gemAPos = gemAScript.getPosition();
     const gemBPos = gemBScript.getPosition();
-    const actionToA = cc.moveTo(moveSpeed, gemAPos);
-    const actionToB = cc.moveTo(moveSpeed, gemBPos);
+    const actionToA = cc.moveTo(moveTime, gemAPos);
+    const actionToB = cc.moveTo(moveTime, gemBPos);
     Gem1.setLocalZOrder(1);
     Gem1.runAction(actionToB);
     Gem2.runAction(actionToA);
@@ -173,17 +184,16 @@ cc.Class({
     const maxMatch = event.maxMatch;
 
     if(tag & 2) {
-      for(var y = _up + 1; y < _dn; y++) {
-        let delGem = script.getGem(_x, y);
-        delGem.destroy();
+      for(var y = _dn + 1; y < _up; y++) {
+        this.delGem(script.getGem(_x, y));
       }
     }
     if(tag & 1) {
       for(var x = _lt + 1; x < _rt; x++) {
-        let delGem = script.getGem(x, _y);
-        delGem.destroy();
+        this.delGem(script.getGem(x, _y));
       }
     }
+    // this.makeSPGem(event);
   },
   /**
    * 匹配探测
@@ -194,27 +204,32 @@ cc.Class({
   matchDetect(Gem){
     const script = this.node.getComponent("Game");
     const _map = script.colorMap;
-    const _x = script.getNodePosition(Gem).x;
-    const _y = script.getNodePosition(Gem).y;
+    const position = script.getNodePosition(Gem);
+    const _x = position.x;
+    const _y = position.y;
+    if (_x == -1 || _y == -1) return false;
     let tag = 0;
     // tag = 0 不可消除
     // tag = 1 横向可消除
     // tag = 2 纵向可消除
     // tag = 3 横竖可消除
     let _up = _y, _dn = _y;
-    while(_up >= 0 && _map[_x][_up] == _map[_x][_y]) _up--;
-    while(_dn < script.width && _map[_x][_dn] == _map[_x][_y]) _dn++;
-    if(_dn - _up >= 4) tag = tag | 2;
+    while (_dn >= 0 && _map[_x][_dn] == _map[_x][_y]) _dn--;
+    while (_up < _map[_x].length && _map[_x][_up] == _map[_x][_y]) _up++;
+    if (_up - _dn >= 4) tag = tag | 2;
 
     let _lt = _x, _rt = _x;
-    while(_lt >= 0 && _map[_lt][_y] == _map[_x][_y]) _lt--;
-    while(_rt < script.height && _map[_rt][_y] == _map[_x][_y]) _rt++;
-    if(_rt - _lt >= 4) tag = tag | 1;
-
+    while (_lt >= 0 && _map[_lt][_y] == _map[_x][_y]) _lt--;
+    while (_rt < _map.length && _map[_rt][_y] == _map[_x][_y]) _rt++;
+    if (_rt - _lt >= 4) tag = tag | 1;
+    
+    if(_map[_x][_y] == -1) tag = 0;
     const maxMatch = Math.max(_dn - _up, _rt - _lt) - 1;
     // tag 和 maxMatch 帮助生成特殊宝石
 
     return {
+      x: _x,
+      y: _y,
       tag: tag,
       up: _up,//四个方向的最大匹配位置
       down: _dn,
@@ -223,5 +238,67 @@ cc.Class({
       maxMatch: maxMatch//单方向最大匹配宝石数
     };
   },
-
+  /**
+   * 下落可能检测
+   *
+   * @return     {Array}  每个宝石需要下落的格子数
+   */
+  GemFallDetect() {
+    const script = this.node.getComponent("Game");
+    const colorMap = script.colorMap;
+    let fallmap = [];
+    for (var x = 0; x < colorMap.length; x++) {
+      fallmap[x] = [];
+      for (var y = 0; y < colorMap[x].length; y++) {
+          fallmap[x][y] = (y == 0 ? 0 : fallmap[x][y - 1]);
+        if (colorMap[x][y] == -1) {
+            fallmap[x][y]++;
+        }
+      }
+    }
+    return fallmap;
+  },
+  GemFall() {
+    const fallmap = this.GemFallDetect();
+    const script = this.node.getComponent("Game");
+    const colorMap = script.colorMap;
+    for (var x = 0; x < fallmap.length; x++) {
+      for (var y = 0; y < fallmap[x].length; y++) {
+        if (fallmap[x][y] != 0 && colorMap[x][y] != -1) {
+          const gem = script.getGem(x, y);
+          const gemScript = gem.getComponent("Gem");
+          gemScript.GemFalling = true;
+          if(y - fallmap[x][y] < script.width) {
+            gem.opacity = 255;
+          } else {
+            gem.opacity = 0;
+          }
+          const actionA = cc.moveBy(this.fallTime, 0, -1 * script.gem_spacing * fallmap[x][y]);
+          gem.runAction(actionA);
+          script.colorMap[x][y - fallmap[x][y]] = colorMap[x][y];
+          script.colorMap[x][y] = -1;
+          script.map[x][y - fallmap[x][y]] = gem;
+          this.scheduleOnce(function() {
+            script.makeGem(2);
+            gemScript.GemFalling = false;
+            this.clearGem(gem);
+            this.GemFall();
+          }, this.fallTime * fallmap[x][y] * 1 );
+        }
+      }
+    }
+  },
+  /**
+   * 清除宝石
+   *
+   * @param      {cc.Node}  Gem     The gem
+   */
+  delGem(Gem) {
+    const gemScript = Gem.getComponent("Gem");
+    const position = gemScript.getMapPosition();
+    if (position.x == -1 || position.y == -1) return;
+    const script = this.node.getComponent("Game");
+    script.colorMap[position.x][position.y] = -1;
+    Gem.destroy();
+  }
 });

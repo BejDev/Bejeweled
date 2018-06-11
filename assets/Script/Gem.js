@@ -24,6 +24,8 @@ const GemType = cc.Enum({
 });
 
 // 严禁将非全局属性写在Class 外部，详细原因请看 面向对象编程
+let GemMoving = false;
+let GemFalling = false;
 
 cc.Class({
   extends: cc.Component,
@@ -61,7 +63,12 @@ cc.Class({
   start() {
     this._wall = this.node.parent;
     this.game = this._wall.getComponent("Game");
-    this.game.GemMoving = false;
+    this.GemMoving = false;
+    this.GemFalling = false;
+    // cc.log(this.getMapPosition());
+    if(this.getMapPosition().y >= this.game.width) {
+      this.node.opacity = 0;
+    }
   },
 
   onLoad() {
@@ -69,14 +76,13 @@ cc.Class({
     this.node.on(
       "mousedown",
       function (event) {
-        // cc.log(this.getMapPosition().x, this.getMapPosition().y);
+        // cc.log(this.getMapPosition());
         const GemManagerScript = this._wall.getComponent("GemManager");
         GemManagerScript.gemSelected(this.node);
       },
       this
     );
   },
-
   /**
    * 返回在游戏中的绝对位置
    * @returns {cc.Vec2}
@@ -97,7 +103,7 @@ cc.Class({
    * @returns {GemColor}
    */
   getColor() {
-    return this.getComponent("Gem").color;
+    return this.color;
   },
 
   /**
@@ -105,7 +111,7 @@ cc.Class({
    * @returns {GemType}
    */
   getType() {
-    return this.getComponent("Gem").type;
+    return this.type;
   }
 });
 

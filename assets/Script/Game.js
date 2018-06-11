@@ -3,8 +3,6 @@ let Gem = require("Gem");
 let GemColor = Gem["GemColor"];
 let GemType = Gem["GemType"];
 
-let GemMoving = false;
-let GemFalling = false;
 cc.Class({
   extends: cc.Component,
   properties: {
@@ -35,28 +33,14 @@ cc.Class({
   },
 
   onLoad() {
-    const random_of_max_num = this.gems.length;
     for (var x = 0; x < this.height; x++) {
       this.map[x] = [];
       this.colorMap[x] = [];
-      for (var y = 0; y < this.width; y++) {
-        this.colorMap[x][y] = this.randomNumber(0, random_of_max_num - 1);
+      for (var y = 0; y < this.width * 2; y++) {
+        this.colorMap[x][y] = -1;
       }
     }
-
-    for (var x = 0; x < this.height; x++) {
-      for (var y = 0; y < this.width; y++) {
-        let color = this.colorMap[x][y];
-        while (this.checkColor(x, y, color)) {
-          color = this.randomNumber(0, random_of_max_num - 1);
-        }
-        this.colorMap[x][y] = color;
-        const prefab = this.gems[color];
-        let gem = this.createGem(prefab);
-        this.setGem(x, y, gem);
-        // cc.log(x, y, color);
-      }
-    }
+    this.makeGem(1);
     // cc.log(this.colorMap);
   },
 
@@ -129,7 +113,7 @@ cc.Class({
    */
   checkColor(_x, _y, color, callback) {
     //input invalid
-    if (_x < 0 || _y < 0 || _x >= this.width || _y >= this.height) {
+    if (_x < 0 || _y < 0 || _x >= this.width || _y >= this.height * 2) {
       cc.error("input invalid");
       return false;
     }
@@ -148,7 +132,7 @@ cc.Class({
     let a, b;
     // 在边角上的宝石会忽略某些方向
     // 防止出现内存越界
-    if (px - 2 > 0) {
+    if (px - 2 >= 0) {
       a = c_mp[px - 1][py];
       b = c_mp[px - 2][py];
       if (is_same(a, b, color)) tag = true;
@@ -158,7 +142,7 @@ cc.Class({
       b = c_mp[px + 2][py];
       if (is_same(a, b, color)) tag = true;
     }
-    if (py - 2 > 0) {
+    if (py - 2 >= 0) {
       a = c_mp[px][py - 1];
       b = c_mp[px][py - 2];
       if (is_same(a, b, color)) tag = true;
@@ -193,6 +177,7 @@ cc.Class({
   getNodePosition(node) {
     //
     const map = this.map;
+    // cc.log(this.map);
     let i, j;
     for (i = 0; i < map.length; i++) {
       j = map[i].indexOf(node);
@@ -221,6 +206,31 @@ cc.Class({
     this.colorMap[posA.x][posA.y] = this.colorMap[posB.x][posB.y];
     this.colorMap[posB.x][posB.y] = tmp;
     // cc.log(this.colorMap[posA.x][posA.y], this.colorMap[posB.x][posB.y]);
+  },
+  /**
+   * Makes gems.
+   *
+   * @param      {Number}  1是全局生成 2是隐藏部分生成
+   */
+  makeGem(option) {
+    const random_of_max_num = this.gems.length;
+    const y0 = (option == 1 ? 0 : this.width);
+    for (var x = 0; x < this.height; x++) {
+      for (var y = y0; y < this.width * 2; y++) {
+        if(this.colorMap[x][y] == -1) {
+          cc.log(123321);
+          this.colorMap[x][y] = this.randomNumber(0, random_of_max_num - 1);
+          let color = this.colorMap[x][y];
+          while (this.checkColor(x, y, color)) {
+            color = this.randomNumber(0, random_of_max_num - 1);
+          }
+          this.colorMap[x][y] = color;
+          const prefab = this.gems[color];
+          let gem = this.createGem(prefab);
+          this.setGem(x, y, gem);
+        }
+      }
+    }
   }
 });
 
