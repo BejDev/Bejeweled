@@ -160,8 +160,10 @@ cc.Class({
   clearGem(Gem) {
     const script = this.node.getComponent("Game");
     const _map = script.colorMap;
-    const _x = script.getNodePosition(Gem).x;
-    const _y = script.getNodePosition(Gem).y;
+    const position = script.getNodePosition(Gem);
+    const _x = position.x;
+    const _y = position.y;
+
     const event = this.matchDetect(Gem);
     const tag = event.tag;
     const _up = event.up;
