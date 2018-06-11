@@ -35,6 +35,10 @@ cc.Class({
     moveSpeed: {
       default: 0.2,
       tooltip: "宝石移动速度"
+    },
+    fallSpeed: {
+      default: 0.2,
+      tooltip: "下落速度/格"
     }
   },
 
@@ -70,12 +74,16 @@ cc.Class({
   },
 
   /**
+   * 检查移动是否造成匹配
    *
+   * @param      {cc.Node}   Gem1    The gem 1
+   * @param      {cc.Node}   Gem2    The gem 2
+   * @return     {Number}
    */
   _checkGemMap(Gem1, Gem2) {
-    let tag = false;
-    tag = tag | this.ceshi(Gem1);
-    tag = tag | this.ceshi(Gem2);
+    let tag = 0;
+    tag = tag | this.matchDetect(Gem1).tag;
+    tag = tag | this.matchDetect(Gem2).tag;
     return tag;
   },
 
@@ -145,11 +153,43 @@ cc.Class({
     Gem1.setLocalZOrder(0);
   },
   /**
-   * 以该宝石向四周搜索联系宝石
+   * 清除该宝石四周能清除的宝石
    *
-   * @param {cc.Node} Gem The gem
+   * @param      {cc.Node}  Gem     The gem
    */
   clearGem(Gem) {
+    const script = this.node.getComponent("Game");
+    const _map = script.colorMap;
+    const _x = script.getNodePosition(Gem).x;
+    const _y = script.getNodePosition(Gem).y;
+    const event = this.matchDetect(Gem);
+    const tag = event.tag;
+    const _up = event.up;
+    const _dn = event.down;
+    const _lt = event.left;
+    const _rt = event.right;
+    const maxMatch = event.maxMatch;
+
+    if(tag & 2) {
+      for(var y = _up + 1; y < _dn; y++) {
+        let delGem = script.getGem(_x, y);
+        delGem.destroy();
+      }
+    }
+    if(tag & 1) {
+      for(var x = _lt + 1; x < _rt; x++) {
+        let delGem = script.getGem(x, _y);
+        delGem.destroy();
+      }
+    }
+  },
+  /**
+   * 匹配探测
+   *
+   * @param      {cc.Node}  Gem     The gem
+   * @return     {Object}  datas for match and clear
+   */
+  matchDetect(Gem){
     const script = this.node.getComponent("Game");
     const _map = script.colorMap;
     const _x = script.getNodePosition(Gem).x;
@@ -171,45 +211,15 @@ cc.Class({
 
     const maxMatch = Math.max(_dn - _up, _rt - _lt) - 1;
     // tag 和 maxMatch 帮助生成特殊宝石
-    if(tag & 2) {
-      for(var y = _up + 1; y < _dn; y++) {
-        let delGem = script.getGem(_x, y);
-        delGem.destroy();
-      }
-    }
-    if(tag & 1) {
-      for(var x = _lt + 1; x < _rt; x++) {
-        let delGem = script.getGem(x, _y);
-        delGem.destroy();
-      }
-    }
+
+    return {
+      tag: tag,
+      up: _up,//四个方向的最大匹配位置
+      down: _dn,
+      left: _lt,
+      right: _rt,
+      maxMatch: maxMatch//单方向最大匹配宝石数
+    };
   },
-  /**
-   * 测试bug，等待重构
-   *
-   * @param      {cc.Node}  Gem     The gem
-   * @return     {number}  意思见注释
-   */
-  ceshi(Gem){
-    const script = this.node.getComponent("Game");
-    const _map = script.colorMap;
-    const _x = script.getNodePosition(Gem).x;
-    const _y = script.getNodePosition(Gem).y;
-    let tag = 0;
-    // tag = 0 不可消除
-    // tag = 1 横向可消除
-    // tag = 2 纵向可消除
-    // tag = 3 横竖可消除
-    let _up = _y, _dn = _y;
-    while(_up >= 0 && _map[_x][_up] == _map[_x][_y]) _up--;
-    while(_dn < script.width && _map[_x][_dn] == _map[_x][_y]) _dn++;
-    if(_dn - _up >= 4) tag = tag | 2;
 
-    let _lt = _x, _rt = _x;
-    while(_lt >= 0 && _map[_lt][_y] == _map[_x][_y]) _lt--;
-    while(_rt < script.height && _map[_rt][_y] == _map[_x][_y]) _rt++;
-    if(_rt - _lt >= 4) tag = tag | 1;
-
-    return tag;
-  }
 });

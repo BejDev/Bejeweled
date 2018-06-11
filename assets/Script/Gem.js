@@ -82,7 +82,7 @@ cc.Class({
    * @returns {cc.Vec2}
    */
   getPosition() {
-    return cc.v2(this.node.x, this.node.y);
+    return this.node.getPosition();
   },
   /**
    * 返回在地图上的相对位置
@@ -97,7 +97,7 @@ cc.Class({
    * @returns {GemColor}
    */
   getColor() {
-    return this.color;
+    return this.getComponent("Gem").color;
   },
 
   /**
@@ -105,7 +105,7 @@ cc.Class({
    * @returns {GemType}
    */
   getType() {
-    return this.type;
+    return this.getComponent("Gem").type;
   }
 });
 
