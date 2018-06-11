@@ -44,10 +44,10 @@ cc.Class({
       tooltip: "宝石大小"
     },
     selected: {
-      get: function() {
+      get: function () {
         return this._selected;
       },
-      set: function(value) {
+      set: function (value) {
         this._selected = value;
         if (value) {
           // 被选中
@@ -68,7 +68,7 @@ cc.Class({
     // 鼠标按下
     this.node.on(
       "mousedown",
-      function(event) {
+      function (event) {
         // cc.log(this.getMapPosition().x, this.getMapPosition().y);
         const GemManagerScript = this._wall.getComponent("GemManager");
         GemManagerScript.gemSelected(this.node);
