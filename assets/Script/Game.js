@@ -129,7 +129,8 @@ cc.Class({
    */
   checkColor(_x, _y, color, callback) {
     //input invalid
-    if(_x < 0 || _y < 0 || _x >= this.width || _y >= this.height){
+    if (_x < 0 || _y < 0 || _x >= this.width || _y >= this.height) {
+      cc.error("input invalid");
       return false;
     }
 
