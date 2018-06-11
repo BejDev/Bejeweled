@@ -72,11 +72,10 @@ cc.Class({
   },
 
   onLoad() {
-    // 鼠标按下
-    this.node.on(
-      "mousedown",
+	// 触摸按下
+	this.node.on(
+      "touchend",
       function (event) {
-        // cc.log(this.getMapPosition());
         const GemManagerScript = this._wall.getComponent("GemManager");
         GemManagerScript.gemSelected(this.node);
       },
