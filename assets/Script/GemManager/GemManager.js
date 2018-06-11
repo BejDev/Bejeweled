@@ -76,8 +76,10 @@ cc.Class({
       this._swapGemInvalid(Gem1, Gem2);
       script.swapGem(Gem1, Gem2);//换回来
     }
-    Gemjs_a.GemMoving = false;
-    Gemjs_b.GemMoving = false;
+    this.scheduleOnce(function() {
+      Gemjs_a.GemMoving = false;
+      Gemjs_b.GemMoving = false;
+    }, this.moveTime * 1.5);
   },
 
   /**
@@ -105,7 +107,6 @@ cc.Class({
   isNear(Gem1, Gem2) {
     let Gemjs_a = Gem1.getComponent("Gem");
     let Gemjs_b = Gem2.getComponent("Gem");
-
     if(Gemjs_a.GemFalling || Gemjs_a.GemMoving) return false;
     if(Gemjs_b.GemFalling || Gemjs_b.GemMoving) return false;
 
