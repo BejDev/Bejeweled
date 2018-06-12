@@ -75,7 +75,8 @@ cc.Class({
     this.node.on(
       "mousedown",
       function (event) {
-        // cc.log(this.getMapPosition());
+        cc.log(this.GemMoving);
+        if(this.GemMoving || this.GemFalling) return;
         const GemManagerScript = this._wall.getComponent("GemManager");
         GemManagerScript.gemSelected(this.node);
       },

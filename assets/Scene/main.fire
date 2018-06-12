@@ -316,9 +316,6 @@
       },
       {
         "__uuid__": "dce7150b-b0a1-4e72-8ecd-24b56f703550"
-      },
-      {
-        "__uuid__": "23a6f803-92d8-47d5-9234-ea3a3c81a293"
       }
     ],
     "gem_spacing": 72.5
@@ -334,6 +331,7 @@
     "chosenOutline": {
       "__uuid__": "7da9f4f0-7555-436b-b27a-cb639c673098"
     },
-    "moveSpeed": 0.2
+    "moveTime": 0.2,
+    "fallTime": 0.3
   }
 ]

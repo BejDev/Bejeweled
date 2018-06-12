@@ -67,11 +67,11 @@ cc.Class({
     script.swapGem(Gem1, Gem2);
     if(this._checkGemMap(Gem1, Gem2)){
       this._swapGemValid(Gem1, Gem2);
+      this.clearGem(Gem1);
+      this.clearGem(Gem2);
       this.scheduleOnce(function() {
-        this.clearGem(Gem1);
-        this.clearGem(Gem2);
         this.GemFall();
-      }, this.moveTime * 1.5);
+      }, this.moveTime * 2);
     } else {
       this._swapGemInvalid(Gem1, Gem2);
       script.swapGem(Gem1, Gem2);//换回来
@@ -79,7 +79,7 @@ cc.Class({
     this.scheduleOnce(function() {
       Gemjs_a.GemMoving = false;
       Gemjs_b.GemMoving = false;
-    }, this.moveTime * 1.5);
+    }, this.moveTime * 2);
   },
 
   /**
@@ -105,6 +105,7 @@ cc.Class({
    * @returns {boolean}
    */
   isNear(Gem1, Gem2) {
+    if(Gem1 == null || Gem2 == null) return false;
     let Gemjs_a = Gem1.getComponent("Gem");
     let Gemjs_b = Gem2.getComponent("Gem");
     if(Gemjs_a.GemFalling || Gemjs_a.GemMoving) return false;
@@ -216,7 +217,7 @@ cc.Class({
     // tag = 3 横竖可消除
     let _up = _y, _dn = _y;
     while (_dn >= 0 && _map[_x][_dn] == _map[_x][_y]) _dn--;
-    while (_up < _map[_x].length && _map[_x][_up] == _map[_x][_y]) _up++;
+    while (_up < _map[_x].length / 2 && _map[_x][_up] == _map[_x][_y]) _up++;
     if (_up - _dn >= 4) tag = tag | 2;
 
     let _lt = _x, _rt = _x;
@@ -283,8 +284,10 @@ cc.Class({
             script.makeGem(2);
             gemScript.GemFalling = false;
             this.clearGem(gem);
-            this.GemFall();
-          }, this.fallTime * fallmap[x][y] * 1 );
+            this.scheduleOnce(function() {
+              this.GemFall();
+            }, this.moveTime * 1.5 );
+          }, this.fallTime * 1 );
         }
       }
     }
@@ -300,6 +303,8 @@ cc.Class({
     if (position.x == -1 || position.y == -1) return;
     const script = this.node.getComponent("Game");
     script.colorMap[position.x][position.y] = -1;
-    Gem.destroy();
+    this.scheduleOnce(function() {
+      Gem.destroy();
+    }, this.moveTime * 1.5 );
   }
 });
