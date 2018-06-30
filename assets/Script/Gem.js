@@ -26,6 +26,7 @@ const GemType = cc.Enum({
 // 严禁将非全局属性写在Class 外部，详细原因请看 面向对象编程
 let GemMoving = false;
 let GemFalling = false;
+let GemDeleting = false;
 
 cc.Class({
   extends: cc.Component,
@@ -75,7 +76,7 @@ cc.Class({
 	this.node.on(
       "touchend",
       function (event) {
-        if(this.GemMoving || this.GemFalling) return;
+        if(this.GemMoving || this.GemFalling || this.GemDeleting) return;
         const GemManagerScript = this._wall.getComponent("GemManager");
         GemManagerScript.gemSelected(this.node);
       },

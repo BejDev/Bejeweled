@@ -310,11 +310,16 @@ cc.Class({
   delGem(Gem) {
     const gemScript = Gem.getComponent("Gem");
     const position = gemScript.getMapPosition();
+    gemScript.GemDeleting = true;
     if (position.x == -1 || position.y == -1) return;
     const script = this.node.getComponent("Game");
     script.colorMap[position.x][position.y] = -1;
     this.scheduleOnce(function() {
       Gem.destroy();
     }, this.moveTime * 0 );
-  }
+  },
+  // canMoveDetect() {
+  //   let canMove = false;
+    
+  // }
 });
