@@ -1,4 +1,5 @@
 let config = require("../utils/config");
+let prefab = null;
 
 cc.Class({
   extends: cc.Component,
@@ -13,6 +14,10 @@ cc.Class({
         return this._selectedGems;
       },
       set: function(value) {
+        if (prefab === null){
+          prefab = cc.instantiate(this.chosenOutline);
+          prefab.parent = this.node;
+        }
         if (this._selectedGems === undefined) {
           this._selectedGems = [];
         }
@@ -20,7 +25,7 @@ cc.Class({
 
         value.getComponent("Gem").selected = true;
         gems.push(value);
-        // cc.log(gems);
+
         if (gems.length === 2) {
           if (this.isNear(gems[0], gems[1])) {
             this.swapGem(gems[0], gems[1]);
@@ -28,6 +33,12 @@ cc.Class({
           gems[0].getComponent("Gem").selected = false;
           gems.shift();
           gems.shift();
+
+          prefab.opacity = 0;
+        }else{
+          let pos = gems[0].getComponent("Gem").getPosition();
+          prefab.opacity = 255;
+          prefab.setPosition(pos.x,pos.y);
         }
       },
       visible: false
@@ -67,9 +78,9 @@ cc.Class({
     script.swapGem(Gem1, Gem2);
     if(this._checkGemMap(Gem1, Gem2)){
       this._swapGemValid(Gem1, Gem2);
-      this.clearGem(Gem1);
-      this.clearGem(Gem2);
       this.scheduleOnce(function() {
+        this.clearGem(Gem1);
+        this.clearGem(Gem2);
         this.GemFall();
       }, this.moveTime * 2);
     } else {
@@ -105,7 +116,6 @@ cc.Class({
    * @returns {boolean}
    */
   isNear(Gem1, Gem2) {
-    if(Gem1 == null || Gem2 == null) return false;
     let Gemjs_a = Gem1.getComponent("Gem");
     let Gemjs_b = Gem2.getComponent("Gem");
     if(Gemjs_a.GemFalling || Gemjs_a.GemMoving) return false;
@@ -305,6 +315,6 @@ cc.Class({
     script.colorMap[position.x][position.y] = -1;
     this.scheduleOnce(function() {
       Gem.destroy();
-    }, this.moveTime * 1.5 );
+    }, this.moveTime * 0 );
   }
 });
