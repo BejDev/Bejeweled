@@ -76,6 +76,9 @@ cc.Class({
 	this.node.on(
       "touchend",
       function (event) {
+        if(this.type != GemType.NORMAL) {
+          cc.log(this.getMapPosition());
+        }
         if(this.GemMoving || this.GemFalling || this.GemDeleting) return;
         const GemManagerScript = this._wall.getComponent("GemManager");
         GemManagerScript.gemSelected(this.node);
@@ -95,7 +98,7 @@ cc.Class({
    * @returns {{x: number,y: number}}
    */
   getMapPosition() {
-    return this._wall.getComponent("Game").getNodePosition(this.node);
+    return this.game.getNodePosition(this.node);
   },
 
   /**

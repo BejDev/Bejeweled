@@ -238,10 +238,12 @@ cc.Class({
     if(event.tag != 3 && event.maxMatch <= 3) {
       return;
     }
+    cc.log(event);
     this.colorMap[event.x][event.y] = event.color;
     const prefab = this.gems[event.color];
     let gem = this.createGem(prefab);
     const gemScript = gem.getComponent("Gem");
+    gemScript.color = event.color;
     if(event.tag == 3) {
       gemScript.type = GemType.LIGHT;
       gem.getChildByName("Lights").active = true;
