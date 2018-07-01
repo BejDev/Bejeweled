@@ -72,7 +72,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "White",
+    "_name": "Flames",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -163,7 +163,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "onChoosing",
+    "_name": "Lights",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -196,8 +196,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 80,
-      "height": 80
+      "width": 70,
+      "height": 70
     },
     "_rotationX": 0,
     "_rotationY": 0,
@@ -224,7 +224,7 @@
     },
     "_enabled": true,
     "_spriteFrame": {
-      "__uuid__": "5338b305-95f4-4a95-aff9-9b16fdce8d4d"
+      "__uuid__": "568d0bcd-b511-4612-adfc-4bb816e62b7b"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -249,7 +249,7 @@
     "asset": {
       "__uuid__": "a6d93fc1-2fd5-46f4-aa6f-e156c1f0ee30"
     },
-    "fileId": "aackvLtf5Fz7tmdv4GgNlm",
+    "fileId": "f4EIu4UptNgonZ5pdFYihS",
     "sync": false
   },
   {

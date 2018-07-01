@@ -181,13 +181,17 @@ cc.Class({
    * @param      {cc.Node}  Gem     The gem
    */
   clearGem(Gem) {
+    if(Gem == null || Gem == undefined) return;
     const script = this.node.getComponent("Game");
     const _map = script.colorMap;
     const position = script.getNodePosition(Gem);
     const _x = position.x;
     const _y = position.y;
-
     const event = this.matchDetect(Gem);
+    if (event == null) {
+      cc.log(Gem.getPosition());
+      return;
+    }
     const tag = event.tag;
     const _up = event.up;
     const _dn = event.down;
@@ -195,17 +199,17 @@ cc.Class({
     const _rt = event.right;
     const maxMatch = event.maxMatch;
 
-    if(tag & 2) {
+    if (tag & 2) {
       for(var y = _dn + 1; y < _up; y++) {
         this.delGem(script.getGem(_x, y));
       }
     }
-    if(tag & 1) {
+    if (tag & 1) {
       for(var x = _lt + 1; x < _rt; x++) {
         this.delGem(script.getGem(x, _y));
       }
     }
-    // this.makeSPGem(event);
+    if (_x < 8) script.makeSPGem(event);
   },
   /**
    * 匹配探测
@@ -213,13 +217,17 @@ cc.Class({
    * @param      {cc.Node}  Gem     The gem
    * @return     {Object}  datas for match and clear
    */
-  matchDetect(Gem){
+  matchDetect(Gem) {
+    if (Gem.isValid == false || Gem == undefined || Gem == null) return;
     const script = this.node.getComponent("Game");
     const _map = script.colorMap;
     const position = script.getNodePosition(Gem);
     const _x = position.x;
     const _y = position.y;
-    if (_x == -1 || _y == -1) return false;
+    if (_x == -1 || _y == -1) {
+      cc.log(position);
+      return null;
+    }
     let tag = 0;
     // tag = 0 不可消除
     // tag = 1 横向可消除
@@ -236,7 +244,7 @@ cc.Class({
     if (_rt - _lt >= 4) tag = tag | 1;
     
     if(_map[_x][_y] == -1) tag = 0;
-    const maxMatch = Math.max(_dn - _up, _rt - _lt) - 1;
+    const maxMatch = Math.max(_up - _dn, _rt - _lt) - 1;
     // tag 和 maxMatch 帮助生成特殊宝石
 
     return {
@@ -247,6 +255,7 @@ cc.Class({
       down: _dn,
       left: _lt,
       right: _rt,
+      color: _map[_x][_y],
       maxMatch: maxMatch//单方向最大匹配宝石数
     };
   },
@@ -308,18 +317,28 @@ cc.Class({
    * @param      {cc.Node}  Gem     The gem
    */
   delGem(Gem) {
+    if (Gem == undefined || Gem == null || Gem.isValid == false) return;
     const gemScript = Gem.getComponent("Gem");
     const position = gemScript.getMapPosition();
-    gemScript.GemDeleting = true;
-    if (position.x == -1 || position.y == -1) return;
     const script = this.node.getComponent("Game");
+    if(gemScript.GemDeleting == true) return;
+    gemScript.GemDeleting = true;
+    if (gemScript.type == 1) {//LIGHT
+      for(var _x = 0; _x < script.colorMap[0].length; _x++) {
+        cc.log(1);
+        this.delGem(script.getGem(position.x, _x));
+        this.delGem(script.getGem(_x, position.y));
+      }
+    }
+    if (gemScript.type == 4) {//FLAME
+      for(var _x = -1; _x <= 1; _x++) {
+        for(var _y = -1; _y <= 1; _y++) {
+          cc.log(_x, _y);
+          this.delGem(script.getGem(position.x + _x, position.y + _y));
+        }
+      }
+    }
     script.colorMap[position.x][position.y] = -1;
-    this.scheduleOnce(function() {
-      Gem.destroy();
-    }, this.moveTime * 0 );
-  },
-  // canMoveDetect() {
-  //   let canMove = false;
-    
-  // }
+    Gem.destroy();
+  }
 });

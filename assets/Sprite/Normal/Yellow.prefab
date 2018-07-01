@@ -72,7 +72,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "onChoosing",
+    "_name": "Flames",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -105,8 +105,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 80,
-      "height": 80
+      "width": 70,
+      "height": 70
     },
     "_rotationX": 0,
     "_rotationY": 0,
@@ -133,7 +133,7 @@
     },
     "_enabled": true,
     "_spriteFrame": {
-      "__uuid__": "5338b305-95f4-4a95-aff9-9b16fdce8d4d"
+      "__uuid__": "40c40d1c-346d-460e-b2e6-a4e2dac40606"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -158,12 +158,12 @@
     "asset": {
       "__uuid__": "dce7150b-b0a1-4e72-8ecd-24b56f703550"
     },
-    "fileId": "338cIDvq5OgJHtLo0LFpDV",
+    "fileId": "e6+o1EXT9FhZVKqqN+e+VQ",
     "sync": false
   },
   {
     "__type__": "cc.Node",
-    "_name": "Yellow",
+    "_name": "Lights",
     "_objFlags": 0,
     "_parent": {
       "__id__": 1
@@ -224,7 +224,7 @@
     },
     "_enabled": true,
     "_spriteFrame": {
-      "__uuid__": "40c40d1c-346d-460e-b2e6-a4e2dac40606"
+      "__uuid__": "bce5adb8-6d2f-468f-b155-ab16f1ec8a2f"
     },
     "_type": 0,
     "_sizeMode": 0,
@@ -249,7 +249,7 @@
     "asset": {
       "__uuid__": "dce7150b-b0a1-4e72-8ecd-24b56f703550"
     },
-    "fileId": "e6+o1EXT9FhZVKqqN+e+VQ",
+    "fileId": "22+lt/HsRPY6LREh6y0ZRy",
     "sync": false
   },
   {

@@ -97,6 +97,7 @@ cc.Class({
     const spacing = this.gem_spacing; // 间距
     gem.setPosition(_x * spacing - 256, _y * spacing - 253);
     this.map[_x][_y] = gem;
+    this.colorMap[_x][_y] = sprite.color;
   },
 
   /**
@@ -165,8 +166,10 @@ cc.Class({
    * @returns {cc.Node}
    */
   getGem(_x, _y) {
-    // cc.log(_x, _y);
-    return this.map[_x][_y];
+    if(_x < 0 || _y < 0 || _x >= this.map.length || _y >= this.map[_x].length) {
+      return undefined;
+    }
+    else return this.map[_x][_y];
   },
 
   /**
@@ -195,7 +198,7 @@ cc.Class({
   swapGem(gemA, gemB) {
     let posA = gemA.getComponent("Gem").getMapPosition();
     let posB = gemB.getComponent("Gem").getMapPosition();
-    // 三元素交换，我记得JavaScript有更简单的办法
+    // 三元素交换，我记得 JavaScript 有更简单的办法
     // - by Himself65
     // @icy: 如果有我早写了
     let tmp = this.map[posA.x][posA.y];
@@ -218,7 +221,6 @@ cc.Class({
     for (var x = 0; x < this.height; x++) {
       for (var y = y0; y < this.width * 2; y++) {
         if(this.colorMap[x][y] == -1) {
-          cc.log(123321);
           this.colorMap[x][y] = this.randomNumber(0, random_of_max_num - 1);
           let color = this.colorMap[x][y];
           while (this.checkColor(x, y, color)) {
@@ -231,6 +233,34 @@ cc.Class({
         }
       }
     }
+  },
+  makeSPGem(event) {
+    if(event.tag != 3 && event.maxMatch <= 3) {
+      return;
+    }
+    this.colorMap[event.x][event.y] = event.color;
+    const prefab = this.gems[event.color];
+    let gem = this.createGem(prefab);
+    const gemScript = gem.getComponent("Gem");
+    if(event.tag == 3) {
+      gemScript.type = GemType.LIGHT;
+      gem.getChildByName("Lights").active = true;
+      cc.log("LIGHT");
+    } else if(event.maxMatch == 4) {
+      gemScript.type = GemType.FLAME;
+      gem.getChildByName("Flames").active = true;
+      cc.log("FLAME");
+    } else if(event.maxMatch == 5) {
+      gemScript.type = GemType.SUPER;
+      cc.log("SUPER");
+    } else if(event.maxMatch >= 6) {
+      gemScript.type = GemType.STARS;
+      cc.log("STARS");
+    } else {
+      cc.error("invalid SP gem");
+      cc.log(event);
+    }
+    this.setGem(event.x, event.y, gem);
   }
 });
 
