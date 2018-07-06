@@ -75,22 +75,35 @@ cc.Class({
     Gemjs_a.GemMoving = true;
     Gemjs_b.GemMoving = true;
     const script = this.node.getComponent("Game");
-    script.swapGem(Gem1, Gem2);
-    if(this._checkGemMap(Gem1, Gem2)){
-      this._swapGemValid(Gem1, Gem2);
-      this.scheduleOnce(function() {
-        this.clearGem(Gem1);
-        this.clearGem(Gem2);
-        this.GemFall();
-      }, this.moveTime * 2);
+    let aisSuper = Gemjs_a.type == 5;//SUPER Gem
+    let bisSuper = Gemjs_b.type == 5;
+    if(aisSuper && bisSuper) {
+      this.clearColor(-1);
+    } else if(aisSuper && !bisSuper) {
+      this.clearColor(Gemjs_b.color);
+      this.delGem(Gem1);
+    } else if(!aisSuper && bisSuper) {
+      this.clearColor(Gemjs_a.color);
+      this.delGem(Gem2);
+      cc.log(Gem1);
     } else {
-      this._swapGemInvalid(Gem1, Gem2);
-      script.swapGem(Gem1, Gem2);//换回来
+      script.swapGem(Gem1, Gem2);
+      if(this._checkGemMap(Gem1, Gem2)){
+        this._swapGemValid(Gem1, Gem2);
+        this.scheduleOnce(function() {
+          this.clearGem(Gem1);
+          this.clearGem(Gem2);
+          this.GemFall();
+        }, this.moveTime * 2);
+      } else {
+        this._swapGemInvalid(Gem1, Gem2);
+        script.swapGem(Gem1, Gem2);//换回来
+      }
     }
     this.scheduleOnce(function() {
-      Gemjs_a.GemMoving = false;
-      Gemjs_b.GemMoving = false;
-    }, this.moveTime * 2);
+        Gemjs_a.GemMoving = false;
+        Gemjs_b.GemMoving = false;
+      }, this.moveTime * 2);
   },
 
   /**
@@ -209,7 +222,7 @@ cc.Class({
         this.delGem(script.getGem(x, _y));
       }
     }
-    if (_y < 8) script.makeSPGem(event);
+    if (_y < script.width) script.makeSPGem(event);
   },
   /**
    * 匹配探测
@@ -242,7 +255,7 @@ cc.Class({
     while (_lt >= 0 && _map[_lt][_y] == _map[_x][_y]) _lt--;
     while (_rt < _map.length && _map[_rt][_y] == _map[_x][_y]) _rt++;
     if (_rt - _lt >= 4) tag = tag | 1;
-    
+
     if(_map[_x][_y] == -1) tag = 0;
     const maxMatch = Math.max(_up - _dn, _rt - _lt) - 1;
     // tag 和 maxMatch 帮助生成特殊宝石
@@ -318,7 +331,10 @@ cc.Class({
    * @param      {cc.Node}  Gem     The gem
    */
   delGem(Gem) {
-    if (Gem == undefined || Gem == null || Gem.isValid == false) return;
+    if (Gem == undefined || Gem == null || Gem.isValid == false) {
+      cc.error("invalid gem");
+      return;
+    }
     const gemScript = Gem.getComponent("Gem");
     const position = gemScript.getMapPosition();
     const script = this.node.getComponent("Game");
@@ -334,12 +350,27 @@ cc.Class({
     if (gemScript.type == 4) {//FLAME
       for(var _x = -1; _x <= 1; _x++) {
         for(var _y = -1; _y <= 1; _y++) {
-          cc.log(_x, _y);
           this.delGem(script.getGem(position.x + _x, position.y + _y));
         }
       }
     }
     script.colorMap[position.x][position.y] = -1;
     Gem.destroy();
+    // Gem.active = false;
+    // cc.log(Gem);
+  },
+  clearColor(color) {
+    const script = this.node.getComponent("Game");
+    let gemMap = script.map;
+    for(var i = 0; i < script.width; i++) {
+      for(var j = 0; j < script.height; j++) {
+        let gem = gemMap[i][j].getComponent("Gem");
+        let gemColor = gem.getColor();
+        if(gemColor == color || color === -1) {
+          this.delGem(gemMap[i][j]);
+        }
+      }
+    }
+    this.GemFall();
   }
 });

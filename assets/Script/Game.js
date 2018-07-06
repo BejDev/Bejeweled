@@ -26,6 +26,11 @@ cc.Class({
       type: [cc.Prefab],
       tooltip: "宝石数组"
     },
+    superGem: {
+      default: null,
+      type: cc.Prefab,
+      tooltip: "超能宝石"
+    },
     gem_spacing: {
       default: 74,
       tooltip: "宝石间距"
@@ -221,10 +226,10 @@ cc.Class({
     for (var x = 0; x < this.height; x++) {
       for (var y = y0; y < this.width * 2; y++) {
         if(this.colorMap[x][y] == -1) {
-          this.colorMap[x][y] = this.randomNumber(0, random_of_max_num - 1);
+          this.colorMap[x][y] = this.randomNumber(0, random_of_max_num - 2);
           let color = this.colorMap[x][y];
           while (this.checkColor(x, y, color)) {
-            color = this.randomNumber(0, random_of_max_num - 1);
+            color = this.randomNumber(0, random_of_max_num - 2);
           }
           this.colorMap[x][y] = color;
           const prefab = this.gems[color];
@@ -254,6 +259,9 @@ cc.Class({
       cc.log("FLAME");
     } else if(event.maxMatch == 5) {
       gemScript.type = GemType.SUPER;
+      gem.destroy();
+      gem = this.createGem(this.superGem);
+      this.colorMap[event.x][event.y] = 100;//make it special
       cc.log("SUPER");
     } else if(event.maxMatch >= 6) {
       gemScript.type = GemType.STARS;

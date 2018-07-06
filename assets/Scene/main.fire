@@ -318,6 +318,9 @@
         "__uuid__": "dce7150b-b0a1-4e72-8ecd-24b56f703550"
       }
     ],
+    "superGem": {
+      "__uuid__": "6b321ee0-eaa0-4400-8c62-9d80b0fe82ec"
+    },
     "gem_spacing": 72.5
   },
   {
