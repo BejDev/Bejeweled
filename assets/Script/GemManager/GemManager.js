@@ -354,6 +354,16 @@ cc.Class({
         }
       }
     }
+    if (gemScript.type == 6) {//STARS
+      for(var _x = 0; _x < script.colorMap.length; _x++) {
+        for(_y = -1; _y <= 1; _y++){
+          if(position.x + _y >= 0 && position.x + _y < script.width)
+            this.delGem(script.getGem(position.x + _y, _x));
+          if(position.y + _y >= 0 && position.y + _y < script.height)
+            this.delGem(script.getGem(_x, position.y + _y));
+        }
+      }
+    }
     script.colorMap[position.x][position.y] = -1;
     Gem.destroy();
     // Gem.active = false;

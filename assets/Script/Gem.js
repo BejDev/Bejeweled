@@ -10,7 +10,7 @@ const GemColor = cc.Enum({
   ORANGE: 4,
   YELLOW: 5,
   PURPLE: 6,
-  SUPER: -1
+  SUPER: -7
 });
 /**
  * 宝石类型枚举

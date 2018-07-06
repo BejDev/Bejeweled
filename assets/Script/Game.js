@@ -261,10 +261,10 @@ cc.Class({
       gemScript.type = GemType.SUPER;
       gem.destroy();
       gem = this.createGem(this.superGem);
-      this.colorMap[event.x][event.y] = 100;//make it special
       cc.log("SUPER");
     } else if(event.maxMatch >= 6) {
       gemScript.type = GemType.STARS;
+      gem.getChildByName("Stars").active = true;
       cc.log("STARS");
     } else {
       cc.error("invalid SP gem");
