@@ -34,10 +34,25 @@ cc.Class({
     gem_spacing: {
       default: 74,
       tooltip: "宝石间距"
+    },
+    scoreonBoard: {
+      type: cc.Label,
+      default: null,
+      tooltip: "当前得分"
+    },
+    scoreonGem: {
+      type: cc.Prefab,
+      default: null,
+      tooltip: "匹配得分"
+    },
+    basisPoints: {
+      default: 5,
+      tooltip: "消除每个宝石得分"
     }
   },
 
   onLoad() {
+    this.scoreNumber = 0;
     for (var x = 0; x < this.height; x++) {
       this.map[x] = [];
       this.colorMap[x] = [];
@@ -217,14 +232,13 @@ cc.Class({
   },
   /**
    * Makes gems.
-   *
    * @param      {Number}  1是全局生成 2是隐藏部分生成
    */
   makeGem(option) {
     const random_of_max_num = this.gems.length;
-    const y0 = (option == 1 ? 0 : this.width);
-    for (var x = 0; x < this.height; x++) {
-      for (var y = y0; y < this.width * 2; y++) {
+    const y0 = (option == 1 ? 0 : this.height);
+    for (var x = 0; x < this.width; x++) {
+      for (var y = y0; y < this.height * 2; y++) {
         if(this.colorMap[x][y] == -1) {
           this.colorMap[x][y] = this.randomNumber(0, random_of_max_num - 2);
           let color = this.colorMap[x][y];
@@ -235,15 +249,19 @@ cc.Class({
           const prefab = this.gems[color];
           let gem = this.createGem(prefab);
           this.setGem(x, y, gem);
+          if(y >= this.height) gem.opicity = 0;
         }
       }
     }
   },
+  /**
+   * 制造特殊宝石
+   * @param  {object} event GemManager.matchDetect 的返回 event
+   */
   makeSPGem(event) {
     if(event.tag != 3 && event.maxMatch <= 3) {
       return;
     }
-    cc.log(event);
     this.colorMap[event.x][event.y] = event.color;
     const prefab = this.gems[event.color];
     let gem = this.createGem(prefab);
@@ -271,6 +289,21 @@ cc.Class({
       cc.log(event);
     }
     this.setGem(event.x, event.y, gem);
+  },
+  /**
+   * 分数更新
+   * @param  {cc.v2()} position  动态加分提示放置位置
+   * @param  {number} deltaGems 消除宝石个数
+   */
+  addscore(position, deltaGems) {
+    // let label = cc.instantiate(this.scoreonGem);
+    // label.parent = this.node;
+    // label.setPosition(position);
+    let delta = deltaGems * this.basisPoints;
+    this.scoreNumber += delta;
+    // cc.log(label.getComponent(cc.Label));
+    this.scoreonBoard.string = "Score: " + this.scoreNumber.toString();
+    // label.getComponent(cc.Label).string = "+" + delta.toString();
   }
 });
 

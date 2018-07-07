@@ -33,7 +33,6 @@ cc.Class({
           gems[0].getComponent("Gem").selected = false;
           gems.shift();
           gems.shift();
-
           prefab.opacity = 0;
         }else{
           let pos = gems[0].getComponent("Gem").getPosition();
@@ -42,6 +41,11 @@ cc.Class({
         }
       },
       visible: false
+    },
+    debug: {
+      type: cc.Prefab,
+      default: null,
+      tooltip: "picture for debug"
     },
     moveTime: {
       default: 0.2,
@@ -78,21 +82,23 @@ cc.Class({
     let aisSuper = Gemjs_a.type == 5;//SUPER Gem
     let bisSuper = Gemjs_b.type == 5;
     if(aisSuper && bisSuper) {
-      this.clearColor(-1);
+      let delta = this.clearColor(-1);
+      script.addscore(Gem1.getPosition(), delta);
     } else if(aisSuper && !bisSuper) {
-      this.clearColor(Gemjs_b.color);
+      let delta = this.clearColor(Gemjs_b.color);
+      script.addscore(Gem2.getPosition(), delta);
       this.delGem(Gem1);
     } else if(!aisSuper && bisSuper) {
-      this.clearColor(Gemjs_a.color);
+      let delta = this.clearColor(Gemjs_a.color)
+      script.addscore(Gem1.getPosition(), delta);
       this.delGem(Gem2);
-      cc.log(Gem1);
     } else {
       script.swapGem(Gem1, Gem2);
       if(this._checkGemMap(Gem1, Gem2)){
         this._swapGemValid(Gem1, Gem2);
         this.scheduleOnce(function() {
           this.clearGem(Gem1);
-          this.clearGem(Gem2);
+          if(Gem2.isValid || Gemjs_b.GemDeleting) this.clearGem(Gem2);
           this.GemFall();
         }, this.moveTime * 2);
       } else {
@@ -195,6 +201,8 @@ cc.Class({
    */
   clearGem(Gem) {
     if (Gem == undefined || Gem == null || Gem.isValid == false) return;
+    const gemScript = Gem.getComponent("Gem");
+    if(gemScript.GemDeleting) return;
     const script = this.node.getComponent("Game");
     const _map = script.colorMap;
     const position = script.getNodePosition(Gem);
@@ -202,7 +210,9 @@ cc.Class({
     const _y = position.y;
     const event = this.matchDetect(Gem);
     if (event == null) {
-      cc.log(Gem.getPosition());
+      let bug = cc.instantiate(this.debug);
+      bug.parent = this.node;
+      bug.setPosition(Gem.getPosition());
       return;
     }
     const tag = event.tag;
@@ -222,7 +232,8 @@ cc.Class({
         this.delGem(script.getGem(x, _y));
       }
     }
-    if (_y < script.width) script.makeSPGem(event);
+    if(maxMatch >= 3 && _y < script.height) script.addscore(Gem.getPosition(), maxMatch);
+    if (_y < script.height) script.makeSPGem(event);
   },
   /**
    * 匹配探测
@@ -231,8 +242,10 @@ cc.Class({
    * @return     {Object}  datas for match and clear
    */
   matchDetect(Gem) {
-    if (Gem.isValid == false || Gem == undefined || Gem == null) return;
+    if (Gem == undefined || Gem == null) return null;
     const script = this.node.getComponent("Game");
+    const gemScript = Gem.getComponent("Gem");
+    if(gemScript.GemDeleting == true) return null;
     const _map = script.colorMap;
     const position = script.getNodePosition(Gem);
     const _x = position.x;
@@ -259,7 +272,6 @@ cc.Class({
     if(_map[_x][_y] == -1) tag = 0;
     const maxMatch = Math.max(_up - _dn, _rt - _lt) - 1;
     // tag 和 maxMatch 帮助生成特殊宝石
-    const gemScript = Gem.getComponent("Gem");
     let colors = gemScript.getColor();
     return {
       x: _x,
@@ -314,13 +326,15 @@ cc.Class({
           script.colorMap[x][y] = -1;
           script.map[x][y - fallmap[x][y]] = gem;
           this.scheduleOnce(function() {
-            script.makeGem(2);
             gemScript.GemFalling = false;
-            this.clearGem(gem);
-            this.scheduleOnce(function() {
-              this.GemFall();
-            }, this.moveTime * 1.5 );
-          }, this.fallTime * 1 );
+            script.makeGem(2);
+            if(!gemScript.GemDeleting) {
+              this.clearGem(gem);
+              this.scheduleOnce(function() {
+                this.GemFall();
+              }, this.moveTime * 1.5 );
+            }
+          }, this.fallTime * 1.5 );
         }
       }
     }
@@ -332,29 +346,30 @@ cc.Class({
    */
   delGem(Gem) {
     if (Gem == undefined || Gem == null || Gem.isValid == false) {
-      cc.error("invalid gem");
       return;
     }
     const gemScript = Gem.getComponent("Gem");
-    const position = gemScript.getMapPosition();
     const script = this.node.getComponent("Game");
     if(gemScript.GemDeleting == true) return;
     gemScript.GemDeleting = true;
+    const position = gemScript.getMapPosition();
     if (gemScript.type == 1) {//LIGHT
       for(var _x = 0; _x < script.colorMap.length; _x++) {
-        cc.log(1);
         this.delGem(script.getGem(position.x, _x));
         this.delGem(script.getGem(_x, position.y));
       }
-    }
-    if (gemScript.type == 4) {//FLAME
+      script.addscore(Gem.getPosition(), script.width + script.height - 1);
+    } else if (gemScript.type == 4) {//FLAME
       for(var _x = -1; _x <= 1; _x++) {
         for(var _y = -1; _y <= 1; _y++) {
           this.delGem(script.getGem(position.x + _x, position.y + _y));
         }
       }
-    }
-    if (gemScript.type == 6) {//STARS
+      script.addscore(Gem.getPosition(), 9);
+    } else if (gemScript.type == 5) {//SUPER
+      const random_of_max_num = script.gems.length;
+      this.clearColor(script.randomNumber(0, random_of_max_num - 2));
+    } else if (gemScript.type == 6) {//STARS
       for(var _x = 0; _x < script.colorMap.length; _x++) {
         for(_y = -1; _y <= 1; _y++){
           if(position.x + _y >= 0 && position.x + _y < script.width)
@@ -363,24 +378,33 @@ cc.Class({
             this.delGem(script.getGem(_x, position.y + _y));
         }
       }
+      script.addscore(Gem.getPosition(), (this.width + this.height) * 3 - 9);
     }
     script.colorMap[position.x][position.y] = -1;
     Gem.destroy();
     // Gem.active = false;
     // cc.log(Gem);
   },
+  /**
+   * 清除当前全部 color 颜色
+   * @param  {number} color
+   * @return {number} 清除个数
+   */
   clearColor(color) {
     const script = this.node.getComponent("Game");
     let gemMap = script.map;
+    let counter = 0;
     for(var i = 0; i < script.width; i++) {
       for(var j = 0; j < script.height; j++) {
         let gem = gemMap[i][j].getComponent("Gem");
         let gemColor = gem.getColor();
         if(gemColor == color || color === -1) {
           this.delGem(gemMap[i][j]);
+          counter++;
         }
       }
     }
     this.GemFall();
+    return counter;
   }
 });
