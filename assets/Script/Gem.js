@@ -25,10 +25,6 @@ const GemType = cc.Enum({
 });
 
 // 严禁将非全局属性写在Class 外部，详细原因请看 面向对象编程
-let GemMoving = false;
-let GemFalling = false;
-let GemDeleting = false;
-
 cc.Class({
   extends: cc.Component,
 
@@ -73,14 +69,20 @@ cc.Class({
   },
 
   onLoad() {
-	// 触摸按下
-	this.node.on(
+    this.GemMoving = false;
+    this.GemFalling = false;
+    this.GemDeleting = false;
+  	// 触摸按下
+  	this.node.on(
       "touchend",
       function (event) {
         if(this.type != GemType.NORMAL) {
           cc.log(this.getMapPosition());
         }
-        if(this.GemMoving || this.GemFalling || this.GemDeleting) return;
+        if(this.GemMoving || this.GemFalling || this.GemDeleting) {
+          // cc.alert("!!!");
+          return;
+        }
         const GemManagerScript = this._wall.getComponent("GemManager");
         GemManagerScript.gemSelected(this.node);
       },

@@ -11,11 +11,11 @@ cc.Class({
     }
   },
 
-  start () {
+  start() {
     cc.log(111);
     this.scheduleOnce(function() {
       this.node.destroy();
     }, this.existTime * 1.2);
-
   },
+
 });

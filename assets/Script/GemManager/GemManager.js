@@ -101,6 +101,8 @@ cc.Class({
           this.clearGem(Gem1);
           if(Gem2.isValid || Gemjs_b.GemDeleting) this.clearGem(Gem2);
           this.GemFall();
+          // cc.log(script.colorMap);
+          // cc.log(script.map);
         }, this.moveTime * 2);
       } else {
         this._swapGemInvalid(Gem1, Gem2);
@@ -209,6 +211,7 @@ cc.Class({
     const position = script.getNodePosition(Gem);
     const _x = position.x;
     const _y = position.y;
+    if(_y >= script.height) return;
     const event = this.matchDetect(Gem);
     if (event == null) {
       let bug = cc.instantiate(this.debug);
@@ -314,6 +317,11 @@ cc.Class({
       for (var y = 0; y < fallmap[x].length; y++) {
         if (fallmap[x][y] != 0 && colorMap[x][y] != -1) {
           const gem = script.getGem(x, y);
+          if(gem == null || gem == undefined) {
+            cc.error("null!!");
+            continue;
+          }
+          // cc.log(gem);
           const gemScript = gem.getComponent("Gem");
           gemScript.GemFalling = true;
           if(y - fallmap[x][y] < script.width) {
@@ -346,36 +354,43 @@ cc.Class({
    * @param      {cc.Node}  Gem     The gem
    */
   delGem(Gem) {
-    if (Gem == undefined || Gem == null || Gem.isValid == false) {
+    if (Gem == undefined || Gem == null || Gem.parent == null) {
       return;
     }
     const gemScript = Gem.getComponent("Gem");
     const script = this.node.getComponent("Game");
-    if(gemScript.GemDeleting == true) return;
+    // cc.log(gemScript.GemDeleting);
+    if(gemScript.GemDeleting == true){
+      this.scheduleOnce(function() {
+        if(Gem.isValid == true) Gem.destroy();
+      }, 1);
+      return;
+    }
     gemScript.GemDeleting = true;
+    // cc.log(gemScript);
     const position = gemScript.getMapPosition();
     if (gemScript.type == 1) {//LIGHT
       for(var _x = 0; _x < script.colorMap.length; _x++) {
-        this.delGem(script.getGem(position.x, _x));
-        this.delGem(script.getGem(_x, position.y));
+        if(_x != position.y) this.delGem(script.getGem(position.x, _x));
+        if(_x != position.y) this.delGem(script.getGem(_x, position.y));
       }
       script.addScore(Gem.getPosition(), script.width + script.height - 1);
     } else if (gemScript.type == 4) {//FLAME
       for(var _x = -1; _x <= 1; _x++) {
         for(var _y = -1; _y <= 1; _y++) {
-          this.delGem(script.getGem(position.x + _x, position.y + _y));
+          if(_x != 0 && _y != 0) this.delGem(script.getGem(position.x + _x, position.y + _y));
         }
       }
       script.addScore(Gem.getPosition(), 9);
     } else if (gemScript.type == 5) {//SUPER
       const random_of_max_num = script.gems.length;
-      this.clearColor(script.randomNumber(0, random_of_max_num - 2));
+      script.addScore(Gem.getPosition(), this.clearColor(script.randomNumber(0, random_of_max_num - 2)));
     } else if (gemScript.type == 6) {//STARS
       for(var _x = 0; _x < script.colorMap.length; _x++) {
         for(_y = -1; _y <= 1; _y++){
-          if(position.x + _y >= 0 && position.x + _y < script.width)
+          if(position.x + _y >= 0 && position.x + _y < script.width && _x != position.y)
             this.delGem(script.getGem(position.x + _y, _x));
-          if(position.y + _y >= 0 && position.y + _y < script.height)
+          if(position.y + _y >= 0 && position.y + _y < script.height && _x != position.x)
             this.delGem(script.getGem(_x, position.y + _y));
         }
       }
@@ -383,8 +398,6 @@ cc.Class({
     }
     script.colorMap[position.x][position.y] = -1;
     Gem.destroy();
-    // Gem.active = false;
-    // cc.log(Gem);
   },
   /**
    * 清除当前全部 color 颜色
@@ -406,6 +419,8 @@ cc.Class({
       }
     }
     this.GemFall();
+    cc.log(script.colorMap);
+    cc.log(script.map);
     return counter;
   }
 });

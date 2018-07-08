@@ -304,6 +304,9 @@
       },
       {
         "__uuid__": "dce7150b-b0a1-4e72-8ecd-24b56f703550"
+      },
+      {
+        "__uuid__": "23a6f803-92d8-47d5-9234-ea3a3c81a293"
       }
     ],
     "superGem": {
@@ -345,7 +348,7 @@
     "_N$file": null,
     "_isSystemFontUsed": true,
     "_spacingX": 0,
-    "_N$string": "Score: ",
+    "_N$string": "Score: 0",
     "_N$horizontalAlign": 0,
     "_N$verticalAlign": 0,
     "_N$fontFamily": "Arial",
