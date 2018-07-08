@@ -83,18 +83,19 @@ cc.Class({
     let bisSuper = Gemjs_b.type == 5;
     if(aisSuper && bisSuper) {
       let delta = this.clearColor(-1);
-      script.addscore(Gem1.getPosition(), delta);
+      script.addScore(Gem1.getPosition(), delta);
     } else if(aisSuper && !bisSuper) {
       let delta = this.clearColor(Gemjs_b.color);
-      script.addscore(Gem2.getPosition(), delta);
+      script.addScore(Gem2.getPosition(), delta);
       this.delGem(Gem1);
     } else if(!aisSuper && bisSuper) {
       let delta = this.clearColor(Gemjs_a.color)
-      script.addscore(Gem1.getPosition(), delta);
+      script.addScore(Gem1.getPosition(), delta);
       this.delGem(Gem2);
     } else {
       script.swapGem(Gem1, Gem2);
       if(this._checkGemMap(Gem1, Gem2)){
+        script.addChain();
         this._swapGemValid(Gem1, Gem2);
         this.scheduleOnce(function() {
           this.clearGem(Gem1);
@@ -232,7 +233,7 @@ cc.Class({
         this.delGem(script.getGem(x, _y));
       }
     }
-    if(maxMatch >= 3 && _y < script.height) script.addscore(Gem.getPosition(), maxMatch);
+    if(maxMatch >= 3 && _y < script.height) script.addScore(Gem.getPosition(), maxMatch);
     if (_y < script.height) script.makeSPGem(event);
   },
   /**
@@ -358,14 +359,14 @@ cc.Class({
         this.delGem(script.getGem(position.x, _x));
         this.delGem(script.getGem(_x, position.y));
       }
-      script.addscore(Gem.getPosition(), script.width + script.height - 1);
+      script.addScore(Gem.getPosition(), script.width + script.height - 1);
     } else if (gemScript.type == 4) {//FLAME
       for(var _x = -1; _x <= 1; _x++) {
         for(var _y = -1; _y <= 1; _y++) {
           this.delGem(script.getGem(position.x + _x, position.y + _y));
         }
       }
-      script.addscore(Gem.getPosition(), 9);
+      script.addScore(Gem.getPosition(), 9);
     } else if (gemScript.type == 5) {//SUPER
       const random_of_max_num = script.gems.length;
       this.clearColor(script.randomNumber(0, random_of_max_num - 2));
@@ -378,7 +379,7 @@ cc.Class({
             this.delGem(script.getGem(_x, position.y + _y));
         }
       }
-      script.addscore(Gem.getPosition(), (this.width + this.height) * 3 - 9);
+      script.addScore(Gem.getPosition(), (this.width + this.height) * 3 - 9);
     }
     script.colorMap[position.x][position.y] = -1;
     Gem.destroy();

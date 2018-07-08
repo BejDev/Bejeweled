@@ -35,12 +35,12 @@ cc.Class({
       default: 74,
       tooltip: "宝石间距"
     },
-    scoreonBoard: {
+    scoreOnBoard: {
       type: cc.Label,
       default: null,
       tooltip: "当前得分"
     },
-    scoreonGem: {
+    scoreOnGem: {
       type: cc.Prefab,
       default: null,
       tooltip: "匹配得分"
@@ -48,10 +48,35 @@ cc.Class({
     basisPoints: {
       default: 5,
       tooltip: "消除每个宝石得分"
+    },
+    chainTime: {
+      default: 3,
+      tooltip: "连击有效时间"
+    },
+    checkTime: {
+      default: 0.1,
+      tooltip: "检查时间"
+    },
+    nowChainLabel: {
+      default: null,
+      type: cc.Label,
+      tooltip: "当前连击展示框"
+    },
+    maxChainLabel: {
+      default: null,
+      type: cc.Label,
+      tooltip: "最大连击展示框"
+    },
+    chainTimeLeftLebel: {
+      default: null,
+      type: cc.Label,
+      tooltip: "连击剩余时间展示框"
     }
   },
 
   onLoad() {
+    this.nowChain = 0;
+    this.maxChain = 0;
     this.scoreNumber = 0;
     for (var x = 0; x < this.height; x++) {
       this.map[x] = [];
@@ -63,7 +88,22 @@ cc.Class({
     this.makeGem(1);
     // cc.log(this.colorMap);
   },
-
+  start() {
+    this.schedule(function() {
+      if(this.nowChain == 0) {
+        this.chainTimeLeft = 0;
+      }
+      this.chainTimeLeft -= this.checkTime;
+      this.chainTimeLeft = this.chainTimeLeft.toFixed(1);
+      if(this.chainTimeLeft <= 0) {
+        this.nowChain = 0;
+        this.chainTimeLeft = 0;
+      }
+      this.nowChainLabel.string = "NowChain: " + this.nowChain.toString();
+      this.maxChainLabel.string = "MaxChain: " + this.maxChain.toString();
+      this.chainTimeLeftLebel.string = "ChainTimeLeft: " + this.chainTimeLeft.toString();
+    }, this.checkTime);
+  },
   /**
    * 返回[min_num, max_num] 中的任意整数
    *
@@ -295,16 +335,25 @@ cc.Class({
    * @param  {cc.v2()} position  动态加分提示放置位置
    * @param  {number} deltaGems 消除宝石个数
    */
-  addscore(position, deltaGems) {
+  addScore(position, deltaGems) {
     // let label = cc.instantiate(this.scoreonGem);
     // label.parent = this.node;
     // label.setPosition(position);
     let delta = deltaGems * this.basisPoints;
-    this.scoreNumber += delta;
+    this.scoreNumber += delta * (this.nowChain + 1);
     // cc.log(label.getComponent(cc.Label));
-    this.scoreonBoard.string = "Score: " + this.scoreNumber.toString();
+    this.scoreOnBoard.string = "Score: " + this.scoreNumber.toString();
     // label.getComponent(cc.Label).string = "+" + delta.toString();
+  },
+  addChain() {
+    this.nowChain++;
+    this.maxChain = Math.max(this.nowChain, this.maxChain);
+    this.chainTimeLeft = this.chainTime;
+    this.nowChainLabel.string = "NowChain: " + this.nowChain.toString();
+    this.maxChainLabel.string = "MaxChain: " + this.maxChain.toString();
+    this.chainTimeLeftLebel.string = "ChainTimeLeft: " + this.chainTimeLeft.toString();
   }
+
 });
 
 /**
