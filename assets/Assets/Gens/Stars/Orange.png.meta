@@ -1,9 +1,10 @@
 {
-  "ver": "1.0.0",
+  "ver": "2.2.0",
   "uuid": "f41a8d16-8f9a-470a-873f-ba5a8a485733",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
+  "premultiplyAlpha": false,
   "subMetas": {
     "Orange": {
       "ver": "1.0.3",

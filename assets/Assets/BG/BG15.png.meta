@@ -1,9 +1,10 @@
 {
-  "ver": "1.0.0",
+  "ver": "2.2.0",
   "uuid": "72de57ae-da1f-4c13-aced-0d8206a02a48",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
+  "premultiplyAlpha": false,
   "subMetas": {
     "BG15": {
       "ver": "1.0.3",
