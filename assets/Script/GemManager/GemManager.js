@@ -172,10 +172,10 @@ cc.Class({
     const sleepTime = cc.delayTime(0.1);
     let seqA = cc.sequence(actionToB, sleepTime, actionToA);
     let seqB = cc.sequence(actionToA, sleepTime, actionToB);
-    Gem1.setLocalZOrder(1);
+    Gem1.zIndex = 1;
     Gem1.runAction(seqA);
     Gem2.runAction(seqB);
-    Gem1.setLocalZOrder(0);
+    Gem1.zIndex = 0;
   },
 
   /**
@@ -192,10 +192,10 @@ cc.Class({
     const gemBPos = gemBScript.getPosition();
     const actionToA = cc.moveTo(moveTime, gemAPos);
     const actionToB = cc.moveTo(moveTime, gemBPos);
-    Gem1.setLocalZOrder(1);
+    Gem1.zIndex = 1;
     Gem1.runAction(actionToB);
     Gem2.runAction(actionToA);
-    Gem1.setLocalZOrder(0);
+    Gem1.zIndex = 0;
   },
   /**
    * 清除该宝石四周能清除的宝石

@@ -1,13 +1,14 @@
 {
-  "ver": "2.2.0",
+  "ver": "2.3.1",
   "uuid": "1d94e5dc-a3c6-4989-8a2f-2a271fee1c09",
   "type": "sprite",
   "wrapMode": "clamp",
   "filterMode": "bilinear",
   "premultiplyAlpha": false,
+  "platformSettings": {},
   "subMetas": {
     "Orange": {
-      "ver": "1.0.3",
+      "ver": "1.0.4",
       "uuid": "d610c06f-ffcb-4ebb-92cb-b9ab6e71ecaa",
       "rawTextureUuid": "1d94e5dc-a3c6-4989-8a2f-2a271fee1c09",
       "trimType": "auto",
